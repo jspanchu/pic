@@ -1,11 +1,11 @@
 DEBUG ?= 1
 ifeq ($(DEBUG), 1)
-    CFLAGS =-g3 -DDEBUG
+    CXXFLAGS =-g3 -DDEBUG
 else
-    CFLAGS=-DNDEBUG
+    CXXFLAGS=-DNDEBUG
 endif
 
-OBJS = vel_dist.o file_io.o num_density.o driver.o 
+OBJS = vel_dist.o file_io.o num_density.o poisson_solver.o driver.o 
 CXX = g++ -O3
 
 all:	tsi
