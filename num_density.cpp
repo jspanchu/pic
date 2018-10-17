@@ -63,11 +63,11 @@ void NumDensity::setDensity(double rho, int i)
 }
 
 //General functions.
-void NumDensity::calcElecDensity(VelDist* pPlasma)
+void NumDensity::calcElecDensity(VelDist* pCharges)
 {
 	//perform weighting
 }
-void NumDensity::calcIonDensity(VelDist* pPlasma)
+void NumDensity::calcIonDensity(VelDist* pCharges)
 {
 	//perform weighting
 }
