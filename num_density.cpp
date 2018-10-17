@@ -83,6 +83,8 @@ void NumDensity::calcElecDensity(VelDist* pCharges)
 			*(pDensityElec + nodeID + 1) -= (pCharges->getPositionElec(i) - nodeID*this->gridWidth) / (this->gridWidth * this->gridWidth);
 			*(pDensityElec + nodeID) -= (nodeID*this->gridWidth + this->gridWidth - pCharges->getPositionElec(i)) / (this->gridWidth * this->gridWidth);
 		}
+		nodeCoord = 0.;
+		nodeID = 0;
 	}
 	*(pDensityElec + this->nodes-1) = *(pDensityElec + 0);
 	std::cout<<*(pDensityElec + this->nodes-1) << *(pDensityElec + 0) << std::endl;
@@ -106,6 +108,8 @@ void NumDensity::calcIonDensity(VelDist* pCharges)
 			*(pDensityIon + nodeID + 1) += (pCharges->getPositionIon(i) - nodeID*this->gridWidth) / (this->gridWidth * this->gridWidth);
 			*(pDensityIon + nodeID) += (nodeID*this->gridWidth + this->gridWidth - pCharges->getPositionIon(i)) / (this->gridWidth * this->gridWidth);
 		}
+		nodeCoord = 0.;
+		nodeID = 0;
 	}
 	*(pDensityIon + this->nodes-1) = *(pDensityIon + 0);
 	std::cout<<*(pDensityIon + this->nodes-1) << *(pDensityIon + 0) << std::endl;

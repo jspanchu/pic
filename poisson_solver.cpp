@@ -91,8 +91,8 @@ void PoissonSolver::setLocalE(NumDensity* pPlasma, VelDist* pCharges)
 	{
 		double nodeCoord = pCharges->getPositionElec(i);
 		int nodeID = floor(nodeCoord);
-		double weight1 = (nodeCoord - nodeID) / this->gridWidth;
-		double weight2 = (nodeID+1 - nodeCoord) / this->gridWidth;
+		double weight1 = (nodeID+1 - nodeCoord) / this->gridWidth;
+		double weight2 = (nodeCoord - nodeID) / this->gridWidth;
 		*(pLocalE+i) = *(pE+nodeID) * weight1 + *(pE+nodeID+1) * weight2;
 		//std::cout << i << "," << *(pLocalE+i) << std::endl;
 		//reset local variables to zero
