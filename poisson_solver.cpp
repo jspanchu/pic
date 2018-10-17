@@ -28,6 +28,7 @@ PoissonSolver::~PoissonSolver()
 }
 void PoissonSolver::init(NumDensity* pPlasma, VelDist* pCharges)
 {	
+	this->gridWidth = pPlasma->getGridWidth();
 	this->nodes = pPlasma->getNodes();
 	this->numElec = pCharges->getN();
 	this->numIon = pCharges->getN();
@@ -50,7 +51,6 @@ double PoissonSolver::getLocalE(int i)
 //Setters
 void PoissonSolver::setPhi(NumDensity* pPlasma)
 {
-    //you have to multiply rhs by gridWidth^2.
 	this->setDiags();
 	this->setNewCoeffs(pPlasma);
 	//Below are periodic boundary conditions.
@@ -60,7 +60,7 @@ void PoissonSolver::setPhi(NumDensity* pPlasma)
 	//std::cout << nodes-1 << ","<< *(pPhi+nodes-1) << std::endl;
 	for(int i = this->nodes-2; i > 0; --i)
 	{
-		*(pPhi+i) = *(pnewCoeffD+i) - (*(pnewCoeffC+i) * (*(pPhi+i+1)));
+		*(pPhi+i) = (*(pnewCoeffD+i) - (*(pnewCoeffC+i) * (*(pPhi+i+1))))*(this->gridWidth)*(this->gridWidth);
 		//std::cout << i << ","<< *(pPhi+i) << std::endl;
 	}
 	//std::cout << 0 << ","<< *(pPhi+0) << std::endl;
@@ -72,15 +72,15 @@ void PoissonSolver::setE()
 		//i = 0, i = nodes-1 are boundaries.
 		if(i == 0)
 		{
-			*(pE+0) = (*(pPhi+this->nodes-2) - *(pPhi+1)) / (2*gridWidth);
+			*(pE+0) = (*(pPhi+this->nodes-2) - *(pPhi+1)) / (2*this->gridWidth);
 		}
 		else if(i == this->nodes-1)
 		{
-			*(pE+this->nodes-1) = (*(pPhi+this->nodes-2) - *(pPhi+1)) / (2*gridWidth);
+			*(pE+this->nodes-1) = (*(pPhi+this->nodes-2) - *(pPhi+1)) / (2*this->gridWidth);
 		}
 		else
 		{
-			*(pE+i) = (*(pPhi+i-1) - *(pPhi+i+1)) / (2*gridWidth);
+			*(pE+i) = (*(pPhi+i-1) - *(pPhi+i+1)) / (2*this->gridWidth);
 		}
 		//std::cout << i <<","<< *(pE+i) << std::endl;
 	}
@@ -91,8 +91,8 @@ void PoissonSolver::setLocalE(NumDensity* pPlasma, VelDist* pCharges)
 	{
 		double nodeCoord = pCharges->getPositionElec(i);
 		int nodeID = floor(nodeCoord);
-		double weight1 = ((nodeCoord - nodeID) / pPlasma->getGridWidth());
-		double weight2 = ((nodeID+1 - nodeCoord) / pPlasma->getGridWidth());
+		double weight1 = (nodeCoord - nodeID) / this->gridWidth;
+		double weight2 = (nodeID+1 - nodeCoord) / this->gridWidth;
 		*(pLocalE+i) = *(pE+nodeID) * weight1 + *(pE+nodeID+1) * weight2;
 		//std::cout << i << "," << *(pLocalE+i) << std::endl;
 		//reset local variables to zero
