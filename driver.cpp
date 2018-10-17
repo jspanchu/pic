@@ -4,22 +4,22 @@
 #include "include/vel_dist.hpp"
 
 int main(int argc, char **argv) {
-    VelDist *pPlasma;
+    VelDist *pCharges;
     VelDist counterStream;
-    pPlasma = &counterStream;
+    pCharges = &counterStream;
 
-    NumDensity *pCharges;
-    NumDensity charges;
-    pCharges = &charges;
+    NumDensity *pPlasma;
+    NumDensity plasma;
+    pPlasma = &plasma;
 
-	pPlasma->setVbounds();
-    pPlasma->sampleV();
-	pPlasma->setX();
+	pCharges->setVbounds();
+    pCharges->sampleV();
+	pCharges->setX();
 
-    pCharges->setNodes(1000);
-    pCharges->setGridWidth(pPlasma->getL());
-    pCharges->calcElecDensity(pPlasma);
-    pCharges->calcIonDensity(pPlasma);
+    pPlasma->setNodes(1000);
+    pPlasma->setGridWidth(pCharges->getL());
+    pPlasma->calcElecDensity(pCharges);
+    pPlasma->calcIonDensity(pCharges);
 	
 
 }
