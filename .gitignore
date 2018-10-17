@@ -1,0 +1,4 @@
+*.o
+.metadata/
+maxwellian/
+*.out
