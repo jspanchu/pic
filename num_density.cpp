@@ -55,7 +55,7 @@ void NumDensity::setNodes(int n)
 }
 void NumDensity::setGridWidth(double L)
 {
-	this->gridWidth = (L+1)/nodes;
+	this->gridWidth = L/double(nodes);
 }
 void NumDensity::setDensity(double rho, int i)
 {
@@ -69,57 +69,35 @@ void NumDensity::calcElecDensity(VelDist* pCharges)
 	for (int i = 0; i < pCharges->getN(); ++i)
 	{
 		//Find after which node (nodeID) the electron is positioned.
-		nodeCoord = pCharges->getPositionElec(i) / this->gridWidth;
-		nodeID = floor(nodeCoord);
-
-		if(nodeID == this->nodes-2)
-		{	//If the electron is before the last node, increment the 0'th node. This will be equated to density
-			//at last nodeID after the scan is complete to maintain periodicity in density.
-			*(pDensityElec + 0) -= (pCharges->getPositionElec(i) - nodeID*this->gridWidth) / (this->gridWidth * this->gridWidth);
-			*(pDensityElec + nodeID) -= (nodeID*this->gridWidth + this->gridWidth - pCharges->getPositionElec(i)) / (this->gridWidth * this->gridWidth);
+		int nodeID = floor(pCharges->getPositionElec(i) / this->gridWidth);
+		double weight = (pCharges->getPositionElec(i) / this->gridWidth) - double(nodeID);
+		
+		*(pDensityElec + nodeID) += (1. - weight) / this->gridWidth;
+		if(nodeID == this->nodes-1)
+		{	//If the electron is before the last node, increment the 0'th node.
+			*(pDensityElec + 0) += weight / (this->gridWidth);
 		}
 		else
 		{
-			*(pDensityElec + nodeID + 1) -= (pCharges->getPositionElec(i) - nodeID*this->gridWidth) / (this->gridWidth * this->gridWidth);
-			*(pDensityElec + nodeID) -= (nodeID*this->gridWidth + this->gridWidth - pCharges->getPositionElec(i)) / (this->gridWidth * this->gridWidth);
+			*(pDensityElec + nodeID + 1) += weight / (this->gridWidth);
 		}
-		nodeCoord = 0.;
+		weight = 0.;
 		nodeID = 0;
 	}
-	*(pDensityElec + this->nodes-1) = *(pDensityElec + 0);
-	std::cout<<*(pDensityElec + this->nodes-1) << *(pDensityElec + 0) << std::endl;
 }
 void NumDensity::calcIonDensity(VelDist* pCharges)
 {	//Scan all the Ions' positions and 'weight' their positions to their neighbouring nodes.
-	for (int i = 0; i < pCharges->getN(); ++i)
+	for (int i = 0; i< this->nodes; ++i)
 	{
-		//Find after which node (nodeID) the Ion is positioned.
-		nodeCoord = pCharges->getPositionIon(i) / this->gridWidth;
-		nodeID = floor(nodeCoord);
-
-		if(nodeID == this->nodes-2)
-		{	//If the electron is before the last node, increment the 0'th node. This will be equated to density
-			//at last nodeID after the scan is complete to maintain periodicity in density.
-			*(pDensityIon + 0) += (pCharges->getPositionIon(i) - nodeID*this->gridWidth) / (this->gridWidth * this->gridWidth);
-			*(pDensityIon + nodeID) += (nodeID*this->gridWidth + this->gridWidth - pCharges->getPositionIon(i)) / (this->gridWidth * this->gridWidth);
-		}
-		else
-		{
-			*(pDensityIon + nodeID + 1) += (pCharges->getPositionIon(i) - nodeID*this->gridWidth) / (this->gridWidth * this->gridWidth);
-			*(pDensityIon + nodeID) += (nodeID*this->gridWidth + this->gridWidth - pCharges->getPositionIon(i)) / (this->gridWidth * this->gridWidth);
-		}
-		nodeCoord = 0.;
-		nodeID = 0;
-	}
-	*(pDensityIon + this->nodes-1) = *(pDensityIon + 0);
-	std::cout<<*(pDensityIon + this->nodes-1) << *(pDensityIon + 0) << std::endl;
+		*(pDensityIon + i) = double (pCharges->getN()) / pCharges->getL();
+ 	}
 }
 void NumDensity::calcDensity()
 {
 	for (int i = 0; i < this->nodes; ++i) {
-		*(pDensity+i) = *(pDensityElec+i) + *(pDensityIon+i) - 1;
+		*(pDensity+i) = *(pDensityElec+i) / *(pDensityIon+i) - 1.;
 	}
-	std::cout<<*(pDensity + this->nodes-1) << *(pDensity + 0) << std::endl;
+	//std::cout<<*(pDensity + this->nodes-1) << "," << *(pDensity + 0) << std::endl;
 }
 
 
