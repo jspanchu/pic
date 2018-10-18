@@ -10,7 +10,7 @@ for i in range(1,1001):
     v=list(data.v)
     x=list(data.x)
 
-    plt.plot(x,v,".")
+    plt.scatter (x, v, s = 1, c = 'k', marker = 'o')
     plt.title("Phase Trajectories")
 
     plt.xlabel("x")
