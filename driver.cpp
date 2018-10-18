@@ -54,7 +54,7 @@ int main(int argc, char **argv) {
         }
 
         FileIO *pDist;
-        FileIO dist("/output/fvx",j);
+        FileIO dist("./output/fvx",j);
         pDist = &dist;
         pDist->fileWrite("x","v","f");
         for(int i = 0; i < pCharges->getN(); ++i)
@@ -62,7 +62,7 @@ int main(int argc, char **argv) {
             pDist->fileWrite(pCharges->getPositionElec(i),pCharges->getV(i),pCharges->getF(i));
         }
         FileIO *pDens;
-        FileIO dens("/output/rho",j);
+        FileIO dens("./output/rho",j);
         pDens = &dens;
         pDens->fileWrite("x","rho");
         for(int i = 0; i < pPlasma->getNodes(); ++i)
