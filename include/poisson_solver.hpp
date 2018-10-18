@@ -38,6 +38,7 @@ public:
 	void setLocalE(NumDensity*, VelDist*);
 	void setDiags();
 	void setNewCoeffs(NumDensity*);
+	void clearMem();
 };
 
 #endif
