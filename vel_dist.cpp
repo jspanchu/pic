@@ -91,7 +91,6 @@ void VelDist::setV_b(double Vb)
 {
 	this->v_b = Vb;
 }
-
 void VelDist::setVbounds()
 {
 	//v_max = allowable velocity of the farther edge of maxwellian with high velocity.
@@ -147,6 +146,18 @@ void VelDist::setX()
 	std::cout << "Finished " << std::endl;
 
 }
+void VelDist::setPositionElec(double pos, int i)
+{
+	*(pPositionElec + i) = pos;
+}
+void VelDist::setPositionIon(double pos, int i)
+{
+	*(pPositionIon + i) = pos;
+}
+void VelDist::setV(double vel, int i)
+{
+	*(pV + i) = vel;
+}
 //General functions start.
 void VelDist::show()
 {
@@ -159,7 +170,7 @@ void VelDist::show()
 }
 void VelDist::generateX(int i)
 {
-	this->pX[i] = 0 + L * (double) rand() / (double) RAND_MAX;
+	this->pX[i] = L * (double) rand() / (double) RAND_MAX;
 }
 void VelDist::sampleV()
 {
