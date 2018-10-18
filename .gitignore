@@ -2,5 +2,6 @@ tsi
 .metadata/
 maxwellian/
 output/
+imagesOut/
 *.out
 *.o
