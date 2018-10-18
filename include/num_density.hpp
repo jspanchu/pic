@@ -9,7 +9,6 @@ class NumDensity
 private:
 	double gridWidth = 0.;
 	int nodes = 1000;
-	int nodeID = 0;
 	double nodeCoord = 0.;
 	double* pDensityElec;
 	double* pDensityIon;
