@@ -65,6 +65,10 @@ void NumDensity::setDensity(double rho, int i)
 //General functions.
 void NumDensity::calcElecDensity(VelDist* pCharges)
 {
+	for (int i = 0; i < pCharges->getN(); ++i)
+	{
+		*(pDensityElec + i) = 0.;
+	}
 	//Scan all the electrons' positions and 'weight' their positions to their neighbouring nodes.
 	for (int i = 0; i < pCharges->getN(); ++i)
 	{
