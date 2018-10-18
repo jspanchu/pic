@@ -1,5 +1,6 @@
 tsi
-*.o
 .metadata/
 maxwellian/
+output/
 *.out
+*.o
