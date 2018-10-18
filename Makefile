@@ -20,4 +20,4 @@ tsi:	$(OBJS)
 	$(CC) -c $(CFLAGS) $(CPPFLAGS) -o $@ $<
 
 clean:
-	rm -fr vel_dist $(OBJS) *.out *.png
+	rm -fr vel_dist $(OBJS) *.out *.png ./imagesOut/*.png ./output/*.out
