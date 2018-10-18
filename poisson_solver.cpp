@@ -2,7 +2,7 @@
 #include "include/num_density.hpp"
 #include "include/vel_dist.hpp"
 #include <cmath>
-
+#include <iostream>
 PoissonSolver::PoissonSolver(NumDensity* pPlasma, VelDist* pCharges)
 {
 	this->init(pPlasma,pCharges);
@@ -72,15 +72,15 @@ void PoissonSolver::setE()
 		//i = 0, i = nodes-1 are boundaries.
 		if(i == 0)
 		{
-			*(pE+0) = (*(pPhi+this->nodes-2) - *(pPhi+1)) / (2*this->gridWidth);
+			*(pE+0) = (*(pPhi+this->nodes-1) - *(pPhi+1)) / 2. /this->gridWidth;
 		}
 		else if(i == this->nodes-1)
 		{
-			*(pE+this->nodes-1) = (*(pPhi+this->nodes-2) - *(pPhi+1)) / (2*this->gridWidth);
+			*(pE+this->nodes-1) = (*(pPhi+this->nodes-2) - *(pPhi+0)) / 2. /this->gridWidth;
 		}
 		else
 		{
-			*(pE+i) = (*(pPhi+i-1) - *(pPhi+i+1)) / (2*this->gridWidth);
+			*(pE+i) = (*(pPhi+i-1) - *(pPhi+i+1)) / 2. /this->gridWidth;
 		}
 		//std::cout << i <<","<< *(pE+i) << std::endl;
 	}
@@ -89,10 +89,10 @@ void PoissonSolver::setLocalE(NumDensity* pPlasma, VelDist* pCharges)
 {
 	for(int i = 0; i < this->numElec; ++i)
 	{
-		double nodeCoord = pCharges->getPositionElec(i);
+		double nodeCoord = pCharges->getPositionElec(i) / this->gridWidth;
 		int nodeID = floor(nodeCoord);
-		double weight1 = (nodeID+1 - nodeCoord) / this->gridWidth;
-		double weight2 = (nodeCoord - nodeID) / this->gridWidth;
+		double weight1 = (this->gridWidth * (nodeID + 1)- pCharges->getPositionElec(i)) / (this->gridWidth);
+		double weight2 = (pCharges->getPositionElec(i) - nodeID*this->gridWidth) / (this->gridWidth);
 		*(pLocalE+i) = *(pE+nodeID) * weight1 + *(pE+nodeID+1) * weight2;
 		//std::cout << i << "," << *(pLocalE+i) << std::endl;
 		//reset local variables to zero
