@@ -5,7 +5,7 @@ else
     CXXFLAGS=-DNDEBUG
 endif
 
-OBJS = vel_dist.o file_io.o num_density.o poisson_solver.o driver.o 
+OBJS = vel_dist.o file_io.o num_density.o poisson_solver.o particle_mover.o driver.o 
 CXX = g++ -O3
 
 all:	tsi
