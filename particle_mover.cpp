@@ -14,9 +14,10 @@
 
 ParticleMover::ParticleMover()
 {
-	this->t = 100.; // in terms of 1 / omega = sqrt((m*eps) / (500000*e*e))  ~ 2.506590041516934e-05
+	this->t = 0.;
+	this->t_max = 100.; // in terms of 1 / omega = sqrt((m*eps) / (500000*e*e))  ~ 2.506590041516934e-05
 	this->dt = 0.1; // in terms of 1 / omega = sqrt((m*eps) / (500000*e*e)) ~ 2.506590041516934e-05
-	this->iter = t / dt;
+	this->iter = t_max / dt;
 	//ctor
 }
 ParticleMover::~ParticleMover()
@@ -24,14 +25,24 @@ ParticleMover::~ParticleMover()
 	//dtor
 }
 
+//Getters.
 int ParticleMover::getIter()
 {
-	return iter;
+	return this->iter;
 }
-void ParticleMover::setTime(double t)
+double ParticleMover::getK()
 {
-	this->t = t;
+	return this->K;
+}
+double ParticleMover::getU()
+{
+	return this->U;
+}
 
+//Setters
+void ParticleMover::setTime(double t_max)
+{
+	this->t_max = t_max;
 }
 void ParticleMover::setTimeStep(double dt)
 {
@@ -39,7 +50,7 @@ void ParticleMover::setTimeStep(double dt)
 }
 void ParticleMover::xIncr(NumDensity* pPlasma, VelDist* pCharges)
 {
-	std::cout << "Pushing all the electrons." << std::endl;
+	std::cout << "Pushing all the electrons..." << std::endl;
 	for (int i = 0; i < pCharges->getN(); ++i)
 	{
 		//std::cout << i << std::endl;
@@ -52,21 +63,24 @@ void ParticleMover::xIncr(NumDensity* pPlasma, VelDist* pCharges)
 		{
 			pCharges->setPositionElec(pCharges->getPositionElec(i) + pCharges->getL(), i);
 		}
-		if (i > pCharges->getN())
-		{
-			std::cout << "HALT HALT !!" << std::endl;
-		}
-		//std::cout << i << "..." << pCharges->getPositionElec(i) << std::endl;
 	}
+	this->t +=dt;
 	
 }
-void ParticleMover::vIncr(PoissonSolver* pSystem, VelDist* pCharges)
+void ParticleMover::vIncr(PoissonSolver* pSystem, VelDist* pCharges, int k)
 {
-	std::cout << "Incrementing velocities of all the electrons." << std::endl;
+	std::cout << "Incrementing velocities of all the electrons..." << std::endl;
 	for (int i = 0; i < pCharges->getN(); ++i)
 	{
-		//std::cout << i << std::endl;
-		pCharges->setV(pCharges->getV(i) + dt * (pSystem->getLocalE(i)), i);
+		if(k == 1)
+		{
+			pCharges->setV(pCharges->getV(i) + (dt/2.) * (pSystem->getLocalE(i)),i);
+		}
+		else
+		{	
+			pCharges->setV(pCharges->getV(i) - (dt) * (pSystem->getLocalE(i)), i);
+		}
 	}
 
 }
+
