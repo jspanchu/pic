@@ -12,6 +12,14 @@
 
 void calcElecField(NumDensity*, VelDist*, PoissonSolver*);
 int main(int argc, char **argv) {
+    char option;
+    double v_th = 0.;
+    double v_b = 0.;
+    int n_0 = 0;
+    int nodes = 0;
+    double t_max = 0.;
+    double dt = 0.;
+
     VelDist *pCharges;
     VelDist counterStream;
     pCharges = &counterStream;
@@ -19,6 +27,42 @@ int main(int argc, char **argv) {
     NumDensity *pPlasma;
     NumDensity plasma;
     pPlasma = &plasma;
+    
+    ParticleMover* pIterator;
+    ParticleMover iterator;
+    pIterator = &iterator;
+
+    std::cout << "\n\n#################################" << std::endl;
+    std::cout << "Default parameters are : " << std::endl;
+    pCharges->show();
+    std::cout << "Nodes : " << pPlasma->getNodes() << std::endl;
+    std::cout << "t_max : " << pIterator->getTmax() << std::endl;
+    std::cout << "dt : " << pIterator->getDt() << std::endl;
+    std::cout << "#################################\n\n";
+    std::cout << "Accept defaults or set new ones ? (y/n)" << std::endl;
+    std::cin >> option;
+    if (option == 'n' | option == 'N')
+    {
+        std::cout << "\nEnter thermal velocity in debye lengths : " << std::endl;
+        std::cin >> v_th;
+        pCharges->setV_th(v_th);
+        std::cout << "\nEnter beam velocity in terms of thermal velocity : " << std::endl;
+        std::cin >> v_b;
+        pCharges->setV_b(v_b);
+        std::cout << "\nEnter number of charges in the plasma : " << std::endl;
+        std::cin >> n_0;
+        pCharges->setN(n_0);
+        std::cout << "\nEnter number of nodes on the grid : " << std::endl;
+        std::cin >> nodes;
+        pPlasma->setNodes(nodes);
+        std::cout << "\nEnter maximum time (in inverse plasma frequencies) upto which simulation would evolve : " << std::endl;
+        std::cin >> t_max;
+        pIterator->setTmax(t_max);
+        std::cout << "\nEnter time step (in inverse plasma frequencies) : " << std::endl;
+        std::cin >> dt;
+        pIterator->setDt(dt);
+    } 
+    else
 
 	pCharges->setVbounds();
     pCharges->sampleV();
@@ -30,10 +74,6 @@ int main(int argc, char **argv) {
     PoissonSolver *pSystem;
     PoissonSolver system(pPlasma,pCharges);
     pSystem = &system;
-
-    ParticleMover* pIterator;
-    ParticleMover iterator;
-    pIterator = &iterator;
 
     for (int k = 0; k <= pIterator->getIter(); ++k)
     {
