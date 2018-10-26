@@ -1,12 +1,14 @@
 #include <iostream>
 #include <cstdlib>
 #include <string>
+#include <cmath>
+#include <fstream>
+#include <ctime>
 #include "include/num_density.hpp"
 #include "include/vel_dist.hpp"
 #include "include/poisson_solver.hpp"
 #include "include/particle_mover.hpp"
 #include "include/file_io.hpp"
-#include "fstream"
 
 void calcElecField(NumDensity*, VelDist*, PoissonSolver*);
 int main(int argc, char **argv) {
@@ -33,17 +35,13 @@ int main(int argc, char **argv) {
     ParticleMover iterator;
     pIterator = &iterator;
 
-    calcElecField(pPlasma, pCharges, pSystem);
-    
-    for (int k = 1; k <= pIterator->getIter(); ++k)
+    //calcElecField(pPlasma, pCharges, pSystem);
+
+    for (int k = 0; k <= pIterator->getIter(); ++k)
     {
-        std::cout << "Time step : " << k << std::endl;
-        pIterator->xIncr(pPlasma,pCharges);
-        pIterator->vIncr(pSystem,pCharges);
-        calcElecField(pPlasma, pCharges, pSystem);
-        
         std::string(j) = std::to_string(k);
         j.append(".out");
+        
         FileIO *pPhi;
         FileIO phi("./output/phi",j);
         pPhi = &phi;
@@ -59,6 +57,7 @@ int main(int argc, char **argv) {
         pDist->fileWrite("x","v","f");
         for(int i = 0; i < pCharges->getN(); ++i)
         {
+
             pDist->fileWrite(pCharges->getPositionElec(i),pCharges->getV(i),pCharges->getF(i));
         }
         FileIO *pDens;
@@ -69,20 +68,34 @@ int main(int argc, char **argv) {
         {
             pDens->fileWrite(i,pPlasma->getDensity(i));
         }
+
+        if(k == pIterator->getIter())
+        {
+            break;
+        }
+        //Compute density and fields.
+        calcElecField(pPlasma, pCharges, pSystem);
+        std::cout << "Time step : " << k << std::endl;
+        
+        //Evolve position and velocity.
+        pIterator->xIncr(pPlasma,pCharges);
+        pIterator->vIncr(pSystem,pCharges,k);
+        
     }
-
-
-
+    return 0;
 }
 void calcElecField(NumDensity* pPlasma, VelDist* pCharges, PoissonSolver* pSystem)
 {
     pPlasma->calcElecDensity(pCharges);
     pPlasma->calcIonDensity(pCharges);
-    pPlasma->calcDensity();
+    pPlasma->calcDensity(pCharges);
 
+    std::clock_t t0 = std::clock();
     pSystem->setPhi(pPlasma);
+    std::clock_t t1 = std::clock();
+    std::cout << "Time taken : " << double (t1 - t0) / (double) CLOCKS_PER_SEC << "seconds" << std::endl;
     pSystem->setE();
-    pSystem->setLocalE(pPlasma,pCharges);
+    pSystem->setLocalE(pCharges);
 }
 
 
