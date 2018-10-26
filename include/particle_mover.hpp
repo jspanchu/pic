@@ -9,9 +9,13 @@
 class ParticleMover
 {
 private:
+ 
 	double t = 0.;
+    double t_max = 0.;
     double dt = 0.;
     int iter = 0;
+    double K = 0.;
+    double U = 0.;
 
 public:
 
@@ -23,14 +27,19 @@ public:
 
     //Getters
     int getIter();
+    double getK();
+    double getU();
 
     //Setters
     void setTime(double);
     void setTimeStep(double);
+    void setK(VelDist*);
+    void setU(PoissonSolver*,VelDist*);
 
     //General functions.
     void xIncr(NumDensity*,VelDist*);
-    void vIncr(PoissonSolver*,VelDist*);
+    void vIncr(PoissonSolver*,VelDist*, int);
+    
 
 };
 
