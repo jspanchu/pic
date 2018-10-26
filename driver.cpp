@@ -35,8 +35,6 @@ int main(int argc, char **argv) {
     ParticleMover iterator;
     pIterator = &iterator;
 
-    //calcElecField(pPlasma, pCharges, pSystem);
-
     for (int k = 0; k <= pIterator->getIter(); ++k)
     {
         std::string(j) = std::to_string(k);
@@ -68,14 +66,14 @@ int main(int argc, char **argv) {
         {
             pDens->fileWrite(i,pPlasma->getDensity(i));
         }
-
+        
         if(k == pIterator->getIter())
         {
             break;
         }
         //Compute density and fields.
         calcElecField(pPlasma, pCharges, pSystem);
-        std::cout << "Time step : " << k << std::endl;
+        std::cout << "# Time step : " << k << std::endl;
         
         //Evolve position and velocity.
         pIterator->xIncr(pPlasma,pCharges);
