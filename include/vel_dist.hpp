@@ -1,4 +1,3 @@
-
 //This class generates the velocity distribution of two counter-streaming beams of electrons in a hot unmagnetized
 //plasma. It makes use of the acceptance-rejection sampling method.
 
@@ -8,7 +7,6 @@
 class VelDist
 {
 private:
-	const double pi =  3.1415926;
 	double v_th = 1.;
 	double L = 100;
 	int n_0 = 20000;
@@ -49,6 +47,8 @@ public:
 	void setV(double,int);
 
 	//General functions
+	void init();
+	void destroy();
 	void show();
 	void generateX(int);
 	void sampleV();

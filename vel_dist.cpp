@@ -7,20 +7,12 @@ VelDist::VelDist()
 {
 	//set seed, beam velocity, number of ions/electrons and thermal spread.
 	srand(time(NULL));
-	//pointers to f,v,x
-	this->pX = new double[n_0];
-	this->pF = new double[n_0];
-	this->pV = new double[n_0];	
-	this->pPositionElec = new double[n_0];
-	this->pPositionIon  = new double[n_0];
+	//Init pointers to f,v,x
+	this->init();
 }
 VelDist::~VelDist()
 {
-	delete this->pX;
-	delete this->pV;
-	delete this->pF;
-	delete this->pPositionElec;
-	delete this->pPositionIon;
+	this->destroy();
 }
 
 //Getters start.
@@ -34,15 +26,15 @@ double VelDist::getL()
 }
 double VelDist::getX(int i)
 {
-	return *(pX+i);
+	return *(this->pX+i);
 }
 double VelDist::getF(int i)
 {
-	return *(pF+i);
+	return *(this->pF+i);
 }
 double VelDist::getV(int i)
 {
-	return *(pV+i);
+	return *(this->pV+i);
 }
 double VelDist::getTolerance()
 {
@@ -50,11 +42,11 @@ double VelDist::getTolerance()
 }
 double VelDist::getPositionElec(int i)
 {
-	return *(pPositionElec+i);
+	return *(this->pPositionElec+i);
 }
 double VelDist::getPositionIon(int i)
 {
-	return *(pPositionIon+i);
+	return *(this->pPositionIon+i);
 }
 //Setters start.
 void VelDist::setN(int n0)
@@ -67,16 +59,8 @@ void VelDist::setN(int n0)
 	{
 		this->n_0 = n0;
 		//re-allocate for new number of electrons.
-		delete this->pX;
-		delete this->pF;
-		delete this->pV;
-		delete this->pPositionElec;
-		delete this->pPositionIon;
-		this->pX = new double[n_0];
-		this->pF = new double[n_0];
-		this->pV = new double[n_0];
-		this->pPositionElec = new double[n_0];
-		this->pPositionIon  = new double[n_0];
+		this->destroy();
+		this->init();
 	}
 }
 void VelDist::setL(double L)
@@ -91,11 +75,11 @@ void VelDist::setV_b(double Vb)
 {
 	this->v_b = Vb;
 }
+//v_max = allowable velocity of the farther edge of maxwellian with high velocity.
+//v_min = allowable velocity of the lower edge of maxwellian with low velocity.
+//DO NOT SET THE FACTOR = 1. SET IT SOMEWHERE B/W 1.1 AND 10. 
 void VelDist::setVbounds()
 {
-	//v_max = allowable velocity of the farther edge of maxwellian with high velocity.
-	//v_min = allowable velocity of the lower edge of maxwellian with low velocity.
-	// DO NOT SET THE FACTOR = 1. SET IT SOMEWHERE B/W 1.1 AND 10.
 	this->v_max = 4*v_b;
 	this->v_min = -4*v_b;
 }
@@ -103,9 +87,9 @@ void VelDist::setTolerance(double toler)
 {
 	this->tolerance = toler;
 }
+//Sets position of ions and electrons, makes sure no overlap occurs.
 void VelDist::setX()
 {
-	//Check and rectify this whole function.
 	double elecElecTolerance = 0.;
 	double ionIonTolerance = 0.;
 	double ionElecTolerance = 0.;
@@ -123,7 +107,7 @@ void VelDist::setX()
 			this->generateX(i);
 			elecElecTolerance = std::abs(getX(i) - getX(i+1))/getX(i);
 		}
-		*(pPositionElec+i) = *(pX+i);
+		*(this->pPositionElec+i) = *(this->pX+i);
 	
 	}
 	std::cout << "Finished " << std::endl;
@@ -141,24 +125,41 @@ void VelDist::setX()
 			ionIonTolerance = std::abs(getX(i) - getX(i+1))/getX(i);
 			ionElecTolerance = std::abs(getX(i) - this->getPositionElec(i))/getX(i);
 		}
-		*(pPositionIon+i) = *(pX+i);		
+		*(this->pPositionIon+i) = *(this->pX+i);		
 	}
 	std::cout << "Finished " << std::endl;
 
 }
 void VelDist::setPositionElec(double pos, int i)
 {
-	*(pPositionElec + i) = pos;
+	*(this->pPositionElec + i) = pos;
 }
 void VelDist::setPositionIon(double pos, int i)
 {
-	*(pPositionIon + i) = pos;
+	*(this->pPositionIon + i) = pos;
 }
 void VelDist::setV(double vel, int i)
 {
-	*(pV + i) = vel;
+	*(this->pV + i) = vel;
 }
+
 //General functions start.
+void VelDist::init()
+{
+	this->pX = new double[this->n_0];
+	this->pF = new double[this->n_0];
+	this->pV = new double[this->n_0];	
+	this->pPositionElec = new double[this->n_0];
+	this->pPositionIon  = new double[this->n_0];
+}
+void VelDist::destroy()
+{
+	delete this->pX;
+	delete this->pF;
+	delete this->pV;
+	delete this->pPositionElec;
+	delete this->pPositionIon;
+}
 void VelDist::show()
 {
 	std::cout << "v_b = " << this->v_b << std::endl;
@@ -177,7 +178,7 @@ void VelDist::sampleV()
 	std::cout << "Sampling Velocity..." << std::endl;
 	for (int i = 0 ; i < this->getN() ; ++i)
 	{
-		*(pV+i) = generateV(i);
+		*(this->pV+i) = this->generateV(i);
 	}
 	std::cout << "Finished " << std::endl;
 }
@@ -187,11 +188,11 @@ double VelDist::generateV(int i)
 	double v = 0.;
 	v = v_min + (v_max - v_min)* (double) rand() / (double) RAND_MAX;
 	//return v;
-	return generateF(v,i);
+	return this->generateF(v,i);
 }
 double VelDist::generateF(double v, int i)
 {
-	double param1 = 1/(2.*pi*v_th*v_th);
+	double param1 = 1/(2.*M_PI*v_th*v_th);
 	double param2 = -(v-v_b) * (v-v_b)/(v_th * v_th * 2.);
 	double param3 = -(v+v_b) * (v+v_b)/(v_th * v_th * 2.);
 
@@ -199,11 +200,11 @@ double VelDist::generateF(double v, int i)
 	*(pF+i) = (n_0 * 0.5) * sqrt(param1) * (exp(param2) + exp(param3)) ;
 
 	//FMAX at v = +v_b or -v_b.
-	double F_MAX = (n_0 * 0.5) * sqrt(param1) * (1 + exp(double((-2. * v_b * v_b)/(v_th*v_th))));
+	double F_MAX = (n_0 * 0.5) * sqrt(param1) * (1. + exp((-2. * v_b * v_b)/(v_th*v_th)));
 
 	//generate random w within 0, F_MAX.
 	double w =  F_MAX *  (double) rand() / (double) RAND_MAX;
-	return acceptV(w,v,*(pF+i),i);
+	return this->acceptV(w,v,*(pF+i),i);
 }
 double VelDist::acceptV(double w, double v, double f, int i)
 {
@@ -215,7 +216,7 @@ double VelDist::acceptV(double w, double v, double f, int i)
 	//Rejection and regenerate v.
 	else
 	{
-		return generateV(i);
+		return this->generateV(i);
 	}
 }
 
