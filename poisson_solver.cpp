@@ -3,28 +3,35 @@
 #include "include/vel_dist.hpp"
 #include <cmath>
 #include <iostream>
+
 PoissonSolver::PoissonSolver(NumDensity* pPlasma, VelDist* pCharges)
 {
 	this->init(pPlasma,pCharges);
-    pPhi 		= new double[nodes];
-	pE	 		= new double[nodes];
-	pLocalE     = new double[numElec];
-	plowerDiag  = new double[nodes];
-	pmiddleDiag = new double[nodes];
-	pupperDiag  = new double[nodes];
-	pnewCoeffC  = new double[nodes-1];
-	pnewCoeffD  = new double[nodes];
+    pPhi 		= new double[this->nodes];
+	pLocalPhi   = new double[this->numElec];
+	pE	 		= new double[this->nodes];
+	pLocalE     = new double[this->numElec];
+	pdl	= new double[this->nodes-3];
+	pd	= new double[this->nodes-2];
+	pdu	= new double[this->nodes-3];
+
+	for(int i = 0; i < this->nodes; ++i)
+	{
+		*(pPhi + i) = 0.;
+		*(pLocalPhi + i) = 0.;
+		*(pE + i) = 0.;
+		*(pLocalE + i) = 0.;
+	}
 }
 PoissonSolver::~PoissonSolver()
 {
     delete pPhi;
+	delete pLocalPhi;
 	delete pE;
 	delete pLocalE;
-	delete plowerDiag;
-	delete pmiddleDiag;
-	delete pupperDiag;
-	delete pnewCoeffC;
-	delete pnewCoeffD;
+	delete pdl;
+	delete pd;
+	delete pdu;
 }
 void PoissonSolver::init(NumDensity* pPlasma, VelDist* pCharges)
 {	
@@ -37,34 +44,22 @@ void PoissonSolver::init(NumDensity* pPlasma, VelDist* pCharges)
 //Getters
 double PoissonSolver::getPhi(int i)
 {
-	return *(pPhi+i);
+	return *(this->pPhi+i);
+}
+double PoissonSolver::getLocalPhi(int i)
+{
+	return *(this->pLocalPhi+i);
 }
 double PoissonSolver::getE(int i)
 {
-	return *(pE+i);
+	return *(this->pE+i);
 }
 double PoissonSolver::getLocalE(int i)
 {
-	return *(pLocalE+i);
+	return *(this->pLocalE+i);
 }
 
 //Setters
-void PoissonSolver::setPhi(NumDensity* pPlasma)
-{
-	this->setDiags();
-	this->setNewCoeffs(pPlasma);
-	//Below are periodic boundary conditions.
-	*(pPhi+nodes-1) = 0;
-	*(pPhi+0) = 0;
-	//perform back-substitution.
-	//std::cout << nodes-1 << ","<< *(pPhi+nodes-1) << std::endl;
-	for(int i = this->nodes-2; i > 0; --i)
-	{
-		*(pPhi+i) = (*(pnewCoeffD+i) - (*(pnewCoeffC+i) * (*(pPhi+i+1))))*(this->gridWidth)*(this->gridWidth);
-		//std::cout << i << ","<< *(pPhi+i) << std::endl;
-	}
-	//std::cout << 0 << ","<< *(pPhi+0) << std::endl;
-}
 void PoissonSolver::setE()
 {
 	for(int i = 0; i < (this->nodes); ++i)
@@ -80,54 +75,84 @@ void PoissonSolver::setE()
 		}
 		else
 		{
-			*(pE+i) = (*(pPhi+i-1) - *(pPhi+i+1)) / 2. /this->gridWidth;
+			*(pE+i) = 0.1 * sin(i/2.*M_PI) + (*(pPhi+i-1) - *(pPhi+i+1)) / 2. /this->gridWidth;
 		}
-		//std::cout << i <<","<< *(pE+i) << std::endl;
 	}
 }
-void PoissonSolver::setLocalE(NumDensity* pPlasma, VelDist* pCharges)
+void PoissonSolver::setLocalE(VelDist* pCharges)
 {
 	for(int i = 0; i < this->numElec; ++i)
 	{
-		double nodeCoord = pCharges->getPositionElec(i) / this->gridWidth;
-		int nodeID = floor(nodeCoord);
-		double weight1 = (this->gridWidth * (nodeID + 1)- pCharges->getPositionElec(i)) / (this->gridWidth);
-		double weight2 = (pCharges->getPositionElec(i) - nodeID*this->gridWidth) / (this->gridWidth);
-		*(pLocalE+i) = *(pE+nodeID) * weight1 + *(pE+nodeID+1) * weight2;
-		//std::cout << i << "," << *(pLocalE+i) << std::endl;
-		//reset local variables to zero
-		nodeCoord = 0.;
-		nodeID = 0;
-		weight1 = 0.;
-		weight2 = 0.;
+		double weight = 0.;
+		int nodeID = floor(pCharges->getPositionElec(i) / this->gridWidth);
+		weight = double(nodeID+1) - pCharges->getPositionElec(i) / this->gridWidth;
+		if(nodeID == this->nodes-1)
+		{
+			*(pLocalE + i) = *(pE+nodeID) * weight + *(pE+nodeID+0) * (1.-weight);  
+		}
+		else
+		{
+			*(pLocalE + i) = *(pE+nodeID) * weight + *(pE+nodeID+1) * (1.-weight);			
+		}
 	}
 }
-void PoissonSolver::setDiags()
+void PoissonSolver::setLocalPhi(VelDist* pCharges)
 {
-	//first element of lowerDiag and last element of upperDiag are zero.
-	*(plowerDiag+0) = 0.;
-	*(pupperDiag+(this->nodes)-1) = 0;
+	for(int i = 0; i < this->numElec; ++i)
+	{
+		double weight = 0.;
+		int nodeID = floor(pCharges->getPositionElec(i) / this->gridWidth);
+		weight = double(nodeID+1) - pCharges->getPositionElec(i) / this->gridWidth;
+		if(nodeID == this->nodes-1)
+		{
+			*(pLocalPhi + i) = *(pPhi+nodeID) * weight + *(pPhi+nodeID+0) * (1.-weight);  
+		}
+		else
+		{
+			*(pLocalPhi + i) = *(pPhi+nodeID) * weight + *(pPhi+nodeID+1) * (1.-weight);			
+		}
+	}
 
-	for (int i = 0, j = 1, k = 0; i < this->nodes, j < this->nodes, k < this->nodes-1; ++i, ++j, ++k)
-	{	*(plowerDiag+j)  = 1.;
-		*(pmiddleDiag+i) = -2.;
-		*(pupperDiag+k)  = 1.;
-		*(pPhi+i) = 0.;
-	}
 }
-void PoissonSolver::setNewCoeffs(NumDensity* pPlasma)
+void PoissonSolver::setPhi(NumDensity* pPlasma)
 {
-	*(pnewCoeffC+0) = *(pupperDiag+0) / *(pmiddleDiag+0);
-	*(pnewCoeffD+0) = (pPlasma->getDensity(0)) / *(pmiddleDiag+0);
-	for (int i = 1; i < (this->nodes-1); ++i)
+	double *pRhs = nullptr;
+	pRhs = new double [this->nodes-2];
+
+	//Neumann boundary conditions.
+	*(pPhi + 0) = 0.;
+	*(pPhi + this->nodes-1) = 0.;
+	
+	//Init middle diag and rhs.
+	for(int i = 0; i < this->nodes-2; ++i)
 	{
-		*(pnewCoeffC+i) = *(pupperDiag+i) / (*(pmiddleDiag+i) - (*(plowerDiag+i) * (*(pnewCoeffC+i-1))));
-		//std::cout << "Ci" << *(pnewCoeffC+i) << std::endl;
+		*(pd + i) = -2.;
+		*(pRhs + i) = pPlasma->getDensity(i);
 	}
-	for (int j = 1; j < this->nodes; ++j)
+	//Init lowerdiag and upperdiag.
+	for(int i = 0; i < this->nodes-3; ++i)
 	{
-		*(pnewCoeffD+j) = (pPlasma->getDensity(j) - (*(plowerDiag+j) * (*(pnewCoeffD+j-1))))/
-						(*(pmiddleDiag+j) - (*(plowerDiag+j) * (*(pnewCoeffC+j-1))));
-		//std::cout << "Di" << *(pnewCoeffD+j) << std::endl;
+		*(pdl + i) = 1.;
+		*(pdu + i) = 1.;
+	}
+	solver1D_tridiag(pPhi,pRhs);
+	for(int i = 0; i < this->nodes-2; ++i)
+	{
+		*(pPhi+i+1) = *(pRhs+i) * this->gridWidth * this->gridWidth;
+	}
+	delete pRhs;
+}
+void PoissonSolver::solver1D_tridiag(double* pLhs, double* pRhs)
+{
+    MKL_INT n = this->nodes-2, nrhs = 1, lda = this->nodes-2, ldb = 1, info;
+	info = LAPACKE_dgtsv(LAPACK_ROW_MAJOR, n, nrhs, pdl, pd,
+	 	pdu, pRhs, ldb);
+
+	if( info > 0 )
+	{
+		std::cout << "The diagonal element of the triangular factor of A,\n";
+		std::cout << "U(%i,%i) is zero, so that A is singular;\n" << info << info;
+		std::cout << "the solution could not be computed.\n";
+		exit( 1 );
 	}
 }

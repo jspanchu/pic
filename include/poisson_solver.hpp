@@ -1,6 +1,8 @@
 //This class contains the routines to solve poisson's equation.
 #include "num_density.hpp"
 #include "vel_dist.hpp"
+#include "mkl_lapacke.h"
+
 #ifndef POISSON_SOLVER_HPP_
 #define POISSON_SOLVER_HPP_
 
@@ -12,13 +14,12 @@ private:
 	int numIon = 0;
 	double gridWidth = 0.;
 	double* pPhi = nullptr;
+	double* pLocalPhi = nullptr;
 	double* pE = nullptr;
 	double* pLocalE = nullptr;
-	double* plowerDiag = nullptr;
-	double* pmiddleDiag = nullptr;
-	double* pupperDiag = nullptr;
-	double* pnewCoeffC = nullptr;
-	double* pnewCoeffD = nullptr;
+	double* pdl = nullptr;
+	double* pd = nullptr;
+	double* pdu = nullptr;
 
 public:
 	PoissonSolver(NumDensity*, VelDist*);
@@ -29,16 +30,19 @@ public:
 
 	//Getters
 	double getPhi(int);
+	double getLocalPhi(int);
 	double getE(int);
 	double getLocalE(int);
 
 	//Setters
 	void setPhi(NumDensity*);
+	void setLocalPhi(VelDist*);
 	void setE();
-	void setLocalE(NumDensity*, VelDist*);
+	void setLocalE(VelDist*);
 	void setDiags();
 	void setNewCoeffs(NumDensity*);
 	void clearMem();
+	void solver1D_tridiag(double*, double*);
 };
 
 #endif
