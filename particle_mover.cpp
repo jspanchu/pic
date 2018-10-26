@@ -17,7 +17,7 @@ ParticleMover::ParticleMover()
 	this->t = 0.;
 	this->t_max = 100.; // in terms of 1 / omega = sqrt((m*eps) / (500000*e*e))  ~ 2.506590041516934e-05
 	this->dt = 0.1; // in terms of 1 / omega = sqrt((m*eps) / (500000*e*e)) ~ 2.506590041516934e-05
-	this->iter = t_max / dt;
+	this->setIter();
 	//ctor
 }
 ParticleMover::~ParticleMover()
@@ -26,6 +26,14 @@ ParticleMover::~ParticleMover()
 }
 
 //Getters.
+double ParticleMover::getTmax()
+{
+	return this->t_max;
+}
+double ParticleMover::getDt()
+{
+	return this->dt;
+}
 int ParticleMover::getIter()
 {
 	return this->iter;
@@ -40,13 +48,19 @@ double ParticleMover::getU()
 }
 
 //Setters
-void ParticleMover::setTime(double t_max)
+void ParticleMover::setTmax(double t_max)
 {
 	this->t_max = t_max;
+	this->setIter();
 }
-void ParticleMover::setTimeStep(double dt)
+void ParticleMover::setDt(double dt)
 {
 	this->dt = dt;
+	this->setIter();
+}
+void ParticleMover::setIter()
+{
+	this->iter = this->t_max / this->dt;
 }
 void ParticleMover::xIncr(NumDensity* pPlasma, VelDist* pCharges)
 {

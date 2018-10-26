@@ -26,13 +26,16 @@ public:
 
 
     //Getters
+    double getTmax();
+    double getDt();
     int getIter();
     double getK();
     double getU();
 
     //Setters
-    void setTime(double);
-    void setTimeStep(double);
+    void setTmax(double);
+    void setDt(double);
+    void setIter();
     void setK(VelDist*);
     void setU(PoissonSolver*,VelDist*);
 
