@@ -16,6 +16,10 @@ VelDist::~VelDist()
 }
 
 //Getters start.
+double VelDist::getV_th()
+{
+	return this->v_th;
+}
 int VelDist::getN()
 {
 	return this->n_0;
@@ -162,11 +166,11 @@ void VelDist::destroy()
 }
 void VelDist::show()
 {
-	std::cout << "v_b = " << this->v_b << std::endl;
-	std::cout << "v_max = " << this->v_max << std::endl;
-	std::cout << "v_min = " << this->v_min << std::endl;
-	std::cout << "v_th = " << this->v_th << std::endl;
-	std::cout << "n_0 = " << this->n_0 << std::endl;
+	std::cout << "v_th : " << this->v_th << std::endl;
+	std::cout << "v_b : " << this->v_b << std::endl;
+	std::cout << "v_max : " << this->v_max << std::endl;
+	std::cout << "v_min : " << this->v_min << std::endl;
+	std::cout << "n_0 : " << this->n_0 << std::endl;
 
 }
 void VelDist::generateX(int i)

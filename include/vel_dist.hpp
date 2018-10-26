@@ -25,6 +25,7 @@ public:
 	~VelDist();
 
 	//Getters.
+	double getV_th();
 	int getN();
 	double getL();
 	double getX(int);
