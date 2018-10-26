@@ -16,7 +16,3 @@ for i in range(0,1000):
     plt.ylabel("phi")
     plt.savefig("./imagesOut/phi" + str(i) + ".png")
     plt.close()
-
-os.system("cd ./imagesOut/ && convert -delay 10 -loop 1 *.png Animation.gif")
-
-

@@ -39,8 +39,8 @@ int main(int argc, char **argv) {
     std::cout << "t_max : " << pIterator->getTmax() << std::endl;
     std::cout << "dt : " << pIterator->getDt() << std::endl;
     std::cout << "#################################\n\n";
-    std::cout << "Accept defaults or set new ones ? (y/n)" << std::endl;
-    std::cin >> option;
+    std::cout << "Accept defaults ? (y/n)" << std::endl;
+    std::cin >> option; std::cout << "\n";
     if (option == 'n' | option == 'N')
     {
         std::cout << "\nEnter thermal velocity in debye lengths : " << std::endl;
@@ -67,8 +67,6 @@ int main(int argc, char **argv) {
 	pCharges->setVbounds();
     pCharges->sampleV();
 	pCharges->setX();
-
-    pPlasma->setNodes(10000);
     pPlasma->setGridWidth(pCharges->getL());
 
     PoissonSolver *pSystem;
@@ -77,6 +75,8 @@ int main(int argc, char **argv) {
 
     for (int k = 0; k <= pIterator->getIter(); ++k)
     {
+
+        std::cout << "\n# Time step : " << k << std::endl;
         std::string(j) = std::to_string(k);
         j.append(".out");
         
@@ -106,14 +106,15 @@ int main(int argc, char **argv) {
         {
             pDens->fileWrite(i,pPlasma->getDensity(i));
         }
+        std::cout << "Wrote Files" << std::endl;
         
         if(k == pIterator->getIter())
         {
             break;
         }
         //Compute density and fields.
+        std::cout << "Computing density and fields..." << std::endl;
         calcElecField(pPlasma, pCharges, pSystem);
-        std::cout << "# Time step : " << k << std::endl;
         
         //Evolve position and velocity.
         pIterator->xIncr(pPlasma,pCharges);
@@ -124,16 +125,16 @@ int main(int argc, char **argv) {
 }
 void calcElecField(NumDensity* pPlasma, VelDist* pCharges, PoissonSolver* pSystem)
 {
+    std::clock_t t0 = std::clock();
     pPlasma->calcElecDensity(pCharges);
     pPlasma->calcIonDensity(pCharges);
     pPlasma->calcDensity(pCharges);
 
-    std::clock_t t0 = std::clock();
     pSystem->setPhi(pPlasma);
-    std::clock_t t1 = std::clock();
-    std::cout << "Time taken : " << double (t1 - t0) / (double) CLOCKS_PER_SEC << "seconds" << std::endl;
     pSystem->setE();
     pSystem->setLocalE(pCharges);
+    std::clock_t t1 = std::clock();
+    std::cout << "Time taken : " << double (t1 - t0) / (double) CLOCKS_PER_SEC << "seconds" << std::endl;
 }
 
 
