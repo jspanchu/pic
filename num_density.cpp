@@ -5,25 +5,12 @@
 //Constructor
 NumDensity::NumDensity()
 {
-	this->pDensity      = new double[nodes];
-	this->pDensityElec  = new double[nodes];
-	this->pDensityIon   = new double[nodes];
-	//gotta initialize all the nodes with charge density 0.0 as the calcDensity functions work to increment
-	//elements of the density array.
-	for (int i = 0; i < nodes; ++i)
-	{
-		*(pDensityElec+i) = 0.;
-		*(pDensityIon+i) = 0.;
-		*(pDensity+i) = 0.;
-	}
+	this->initDensity();
 }
-
 //Destructor
 NumDensity::~NumDensity()
-{
-	delete this->pDensityElec;
-	delete this->pDensityIon;
-	delete this->pDensity;
+{	
+	this->destroyDensity();
 }
 
 //Getters
@@ -37,7 +24,7 @@ int NumDensity::getNodes()
 }
 double NumDensity::getDensity(int i)
 {
-	return *(pDensity+i);
+	return *(this->pDensity + i);
 }
 
 //Setters
@@ -45,17 +32,12 @@ void NumDensity::setNodes(int n)
 {
 	this->nodes = n;
 	//re-alloc memory.
-	delete this->pDensityElec;
-	delete this->pDensityIon;
-	delete this->pDensity;
-	this->pDensity      = new double[nodes];
-	this->pDensityElec  = new double[nodes];
-	this->pDensityIon   = new double[nodes];
-	//call poissonSolver to re-init its member arrays with new size -> nodes.
+	this->destroyDensity();
+	this->initDensity();
 }
 void NumDensity::setGridWidth(double L)
 {
-	this->gridWidth = L/double(nodes);
+	this->gridWidth = L/double(nodes - 1.);
 }
 void NumDensity::setDensity(double rho, int i)
 {
@@ -63,30 +45,47 @@ void NumDensity::setDensity(double rho, int i)
 }
 
 //General functions.
-void NumDensity::calcElecDensity(VelDist* pCharges)
+void NumDensity::initDensity()
 {
-	for (int i = 0; i < pCharges->getN(); ++i)
+	this->pDensity      = new double[this->nodes];
+	this->pDensityElec  = new double[this->nodes];
+	this->pDensityIon   = new double[this->nodes];
+	//gotta initialize all the nodes with charge density 0.0 as the calcDensity functions work to increment
+	//elements of the density array.
+	for (int i = 0; i < this->nodes; ++i)
 	{
 		*(pDensityElec + i) = 0.;
+		*(pDensityIon+i) = 0.;
+		*(pDensity+i) = 0.;
+	}
+}
+void NumDensity::destroyDensity()
+{
+	delete pDensityElec;
+	delete pDensityIon;
+	delete pDensity;
+}
+void NumDensity::calcElecDensity(VelDist* pCharges)
+{
+	for (int i = 0; i < this->nodes; ++i)
+	{
+		*(pDensityElec+i) = 0.;
 	}
 	//Scan all the electrons' positions and 'weight' their positions to their neighbouring nodes.
 	for (int i = 0; i < pCharges->getN(); ++i)
 	{
-		//Find after which node (nodeID) the electron is positioned.
+		double weight = 0.;
 		int nodeID = floor(pCharges->getPositionElec(i) / this->gridWidth);
-		double weight = (pCharges->getPositionElec(i) / this->gridWidth) - double(nodeID);
-		
-		*(pDensityElec + nodeID) += (1. - weight) / this->gridWidth;
-		if(nodeID == this->nodes-1)
-		{	//If the electron is before the last node, increment the 0'th node.
-			*(pDensityElec + 0) += weight / (this->gridWidth);
+		weight = double(nodeID+1) - pCharges->getPositionElec(i) / this->gridWidth;
+		*(pDensityElec+nodeID) += weight / this->gridWidth;
+		if(nodeID == this->nodes - 1)
+		{
+			*(pDensityElec + 0) += (1. - weight) / this->gridWidth;
 		}
 		else
 		{
-			*(pDensityElec + nodeID + 1) += weight / (this->gridWidth);
+			*(pDensityElec+nodeID+1) += (1. - weight) / this->gridWidth;		
 		}
-		weight = 0.;
-		nodeID = 0;
 	}
 }
 void NumDensity::calcIonDensity(VelDist* pCharges)
@@ -96,9 +95,10 @@ void NumDensity::calcIonDensity(VelDist* pCharges)
 		*(pDensityIon + i) = double (pCharges->getN()) / pCharges->getL();
  	}
 }
-void NumDensity::calcDensity()
+void NumDensity::calcDensity(VelDist* pCharges)
 {
-	for (int i = 0; i < this->nodes; ++i) {
+	for (int i = 0; i < this->nodes; ++i) 
+	{
 		*(pDensity+i) = *(pDensityElec+i) / *(pDensityIon+i) - 1.;
 	}
 	//std::cout<<*(pDensity + this->nodes-1) << "," << *(pDensity + 0) << std::endl;

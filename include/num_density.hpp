@@ -26,8 +26,7 @@ public:
     //Getters
     double getGridWidth();
     int getNodes();
-    double getDensity(int);
-
+    double getDensity(int i);
 
     //Setters
     void setNodes(int);
@@ -35,9 +34,11 @@ public:
     void setDensity(double, int);
 
     //General functions.
+    void initDensity();
+    void destroyDensity();
     void calcElecDensity(VelDist*);
     void calcIonDensity(VelDist*);
-    void calcDensity();
+    void calcDensity(VelDist*);
 
 };
 
