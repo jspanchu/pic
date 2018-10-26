@@ -11,7 +11,7 @@ CXX = g++ -O3  -L${MKLROOT}/lib/intel64 -Wl,--no-as-needed -lmkl_intel_ilp64 -lm
 all:	tsi
 
 tsi:	$(OBJS)
-	$(CXX) -o $@ $^ /home/jaswant/proj/lib/libfftw.a
+	$(CXX) -o $@ $^
 
 %.o:	%.cpp
 	$(CXX) -c $(CFLAGS) $(CXXFLAGS) $(CPPFLAGS) -o $@ $<
