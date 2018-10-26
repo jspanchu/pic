@@ -39,6 +39,10 @@
         "type_traits": "cpp",
         "tuple": "cpp",
         "typeinfo": "cpp",
-        "utility": "cpp"
+        "utility": "cpp",
+        "complex": "cpp",
+        "cstring": "cpp",
+        "functional": "cpp",
+        "variant": "cpp"
     }
 }
