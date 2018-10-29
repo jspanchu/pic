@@ -42,13 +42,13 @@ public:
 	void setV_b  (double);
 	void setVbounds();
 	void setTolerance(double);
-	void setX();
 	void setPositionElec(double,int);
 	void setPositionIon(double,int);
 	void setV(double,int);
 
 	//General functions
 	void init();
+	void initPositions();
 	void destroy();
 	void show();
 	void generateX(int);

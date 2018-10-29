@@ -1,6 +1,6 @@
 //This class is meant to contain all functions that give number density to the nodes of the cell.
 #include "vel_dist.hpp"
-
+#include <thread>
 #ifndef NUM_DENSITY_HPP_
 #define NUM_DENSITY_HPP_
 

@@ -92,49 +92,6 @@ void VelDist::setTolerance(double toler)
 {
 	this->tolerance = toler;
 }
-//Sets position of ions and electrons, makes sure no overlap occurs.
-void VelDist::setX()
-{
-	double elecElecTolerance = 0.;
-	double ionIonTolerance = 0.;
-	double ionElecTolerance = 0.;
-
-	for (int i = 0; i < getN(); ++i)
-	{
-		this->generateX(i);
-		if(i != 0)
-		{
-			elecElecTolerance = std::abs(getX(i) - getX(i-1)) /getX(i);
-		}
-		while (elecElecTolerance < this->getTolerance())
-		{
-			std::cout << "generating X for electrons..." << std::endl;
-			this->generateX(i);
-			elecElecTolerance = std::abs(getX(i) - getX(i+1))/getX(i);
-		}
-		*(this->pPositionElec+i) = *(this->pX+i);
-	
-	}
-	std::cout << "Finished " << std::endl;
-	for (int i = 0; i < getN(); ++i)
-	{
-		this->generateX(i);
-		if(i != 0)
-		{
-			ionIonTolerance = std::abs(getX(i) - getX(i-1))/getX(i);
-		}
-		while (ionIonTolerance < this->getTolerance())
-		{
-			std::cout << "generating X for ions..." << std::endl;
-			this->generateX(i);
-			ionIonTolerance = std::abs(getX(i) - getX(i+1))/getX(i);
-			ionElecTolerance = std::abs(getX(i) - this->getPositionElec(i))/getX(i);
-		}
-		*(this->pPositionIon+i) = *(this->pX+i);		
-	}
-	std::cout << "Finished " << std::endl;
-
-}
 void VelDist::setPositionElec(double pos, int i)
 {
 	*(this->pPositionElec + i) = pos;
@@ -157,6 +114,51 @@ void VelDist::init()
 	this->pPositionElec = new double[this->n_0];
 	this->pPositionIon  = new double[this->n_0];
 	this->setVbounds();
+}
+//Sets position of ions and electrons, makes sure no overlap occurs.
+void VelDist::initPositions()
+{
+
+	double elecElecTolerance = 0.;
+	double ionIonTolerance = 0.;
+	double ionElecTolerance = 0.;
+
+	std::cout << "generating X for electrons..." << std::endl;
+	for (int i = 0; i < getN(); ++i)
+	{
+		
+		this->generateX(i);
+		if(i != 0)
+		{
+			elecElecTolerance = std::abs(getX(i) - getX(i-1)) /getX(i);
+		}
+		while (elecElecTolerance < this->getTolerance())
+		{
+			this->generateX(i);
+			elecElecTolerance = std::abs(getX(i) - getX(i+1))/getX(i);
+		}
+		*(this->pPositionElec+i) = *(this->pX+i);
+	
+	}
+	std::cout << "Finished " << std::endl;
+	std::cout << "generating X for ions..." << std::endl;
+	for (int i = 0; i < getN(); ++i)
+	{
+		this->generateX(i);
+		if(i != 0)
+		{
+			ionIonTolerance = std::abs(getX(i) - getX(i-1))/getX(i);
+		}
+		while (ionIonTolerance < this->getTolerance())
+		{
+			this->generateX(i);
+			ionIonTolerance = std::abs(getX(i) - getX(i+1))/getX(i);
+			ionElecTolerance = std::abs(getX(i) - this->getPositionElec(i))/getX(i);
+		}
+		*(this->pPositionIon+i) = *(this->pX+i);		
+	}
+	std::cout << "Finished " << std::endl;
+
 }
 void VelDist::destroy()
 {

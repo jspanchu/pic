@@ -78,18 +78,18 @@ void ParticleMover::xIncr(NumDensity* pPlasma, VelDist* pCharges)
 	this->t +=dt;
 	
 }
-void ParticleMover::vIncr(PoissonSolver* pSystem, VelDist* pCharges, int k)
+void ParticleMover::vIncr(PoissonSolver* pFields, VelDist* pCharges, int k)
 {
 	std::cout << "Incrementing velocities of all the electrons..." << std::endl;
 	for (int i = 0; i < pCharges->getN(); ++i)
 	{
 		if(k == 1)
 		{
-			pCharges->setV(pCharges->getV(i) + (dt/2.) * (pSystem->getLocalE(i)),i);
+			pCharges->setV(pCharges->getV(i) + (dt/2.) * (pFields->getLocalE(i)),i);
 		}
 		else
 		{	
-			pCharges->setV(pCharges->getV(i) - (dt) * (pSystem->getLocalE(i)), i);
+			pCharges->setV(pCharges->getV(i) - (dt) * (pFields->getLocalE(i)), i);
 		}
 	}
 

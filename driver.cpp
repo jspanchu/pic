@@ -4,6 +4,7 @@
 #include <cmath>
 #include <fstream>
 #include <ctime>
+#include <thread>
 #include "include/num_density.hpp"
 #include "include/vel_dist.hpp"
 #include "include/poisson_solver.hpp"
@@ -82,14 +83,13 @@ int main(int argc, char **argv) {
     {
         std::cout << "\nComputing for default values... \n" << std::endl;
     }
-	pCharges->setVbounds();
+    pCharges->initPositions();
     pCharges->sampleV();
-	pCharges->setX();
     pPlasma->setGridWidth(pCharges->getL());
 
-    PoissonSolver *pSystem;
-    PoissonSolver system(pPlasma,pCharges);
-    pSystem = &system;
+    PoissonSolver *pFields;
+    PoissonSolver fields(pPlasma,pCharges);
+    pFields = &fields;
     
     int digits = 0;
     int maxDigits = pIterator->getIter();
@@ -99,23 +99,25 @@ int main(int argc, char **argv) {
         digits++; 
     } 
     while (maxDigits != 0);
+    std::clock_t tsolve0 = std::clock();
     for (int k = 0; k <= pIterator->getIter(); ++k)
     {
 
         std::cout << "\n# Simulation Time : " << k*pIterator->getDt() << std::endl;
         //Compute density and fields.
         std::cout << "Computing density and fields..." << std::endl;
-        calcElecField(pPlasma, pCharges, pSystem);
+        calcElecField(pPlasma, pCharges, pFields);
 
         //Write fields and positions at current time.
         std::string(j) = std::to_string(k);
+
         FileIO *pPhi;
         FileIO phi("phi",j,digits);
         pPhi = &phi;
         pPhi->fileWrite("x","phi");
         for(int i = 0; i < pPlasma->getNodes(); ++i)
         {
-            pPhi->fileWrite(double(i)*double(pCharges->getL())/double(pPlasma->getNodes()), pSystem->getPhi(i));
+            pPhi->fileWrite(double(i)*double(pCharges->getL())/double(pPlasma->getNodes()), pFields->getPhi(i));
         }
 
         FileIO *pDist;
@@ -141,7 +143,7 @@ int main(int argc, char **argv) {
         pE->fileWrite("x","E");
         for(int i = 0; i < pPlasma->getNodes(); ++i)
         {
-            pE->fileWrite(double(i)*double(pCharges->getL())/double(pPlasma->getNodes()),pSystem->getE(i));
+            pE->fileWrite(double(i)*double(pCharges->getL())/double(pPlasma->getNodes()),pFields->getE(i));
         }
 
         std::cout << "Wrote Files" << std::endl;
@@ -153,23 +155,22 @@ int main(int argc, char **argv) {
         
         //Evolve position and velocity.
         pIterator->xIncr(pPlasma,pCharges);
-        pIterator->vIncr(pSystem,pCharges,k);
+        pIterator->vIncr(pFields,pCharges,k);
         
     }
+    std::clock_t tsolve1 = std::clock();
+    std::cout << "Time taken to solve : " << double (tsolve1 - tsolve0) / (double) CLOCKS_PER_SEC << "seconds" << std::endl;
     return 0;
 }
-void calcElecField(NumDensity* pPlasma, VelDist* pCharges, PoissonSolver* pSystem)
+void calcElecField(NumDensity* pPlasma, VelDist* pCharges, PoissonSolver* pFields)
 {
-    std::clock_t tsolve0 = std::clock();
     pPlasma->calcElecDensity(pCharges);
     pPlasma->calcIonDensity(pCharges);
     pPlasma->calcDensity(pCharges);
 
-    pSystem->setPhi(pPlasma);
-    pSystem->setE();
-    pSystem->setLocalE(pCharges);
-    std::clock_t tsolve1 = std::clock();
-    std::cout << "Time taken to solve : " << double (tsolve1 - tsolve0) / (double) CLOCKS_PER_SEC << "seconds" << std::endl;
+    pFields->setPhi(pPlasma);
+    pFields->setE();
+    pFields->setLocalE(pCharges);
 }
 
 

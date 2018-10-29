@@ -43,6 +43,8 @@
         "complex": "cpp",
         "cstring": "cpp",
         "functional": "cpp",
-        "variant": "cpp"
+        "variant": "cpp",
+        "thread": "cpp",
+        "memory": "cpp"
     }
 }
