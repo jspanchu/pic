@@ -14,9 +14,6 @@
 
 ParticleMover::ParticleMover()
 {
-	this->t = 0.;
-	this->t_max = 100.; // in terms of 1 / omega = sqrt((m*eps) / (500000*e*e))  ~ 2.506590041516934e-05
-	this->dt = 0.1; // in terms of 1 / omega = sqrt((m*eps) / (500000*e*e)) ~ 2.506590041516934e-05
 	this->setIter();
 	//ctor
 }

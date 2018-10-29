@@ -78,14 +78,15 @@ void VelDist::setV_th(double Vth)
 void VelDist::setV_b(double Vb)
 {
 	this->v_b = Vb;
+	this->setVbounds();
 }
 //v_max = allowable velocity of the farther edge of maxwellian with high velocity.
 //v_min = allowable velocity of the lower edge of maxwellian with low velocity.
 //DO NOT SET THE FACTOR = 1. SET IT SOMEWHERE B/W 1.1 AND 10. 
 void VelDist::setVbounds()
 {
-	this->v_max = 4*v_b;
-	this->v_min = -4*v_b;
+	this->v_max = 4*this->v_b;
+	this->v_min = -4*this->v_b;
 }
 void VelDist::setTolerance(double toler)
 {
@@ -155,6 +156,7 @@ void VelDist::init()
 	this->pV = new double[this->n_0];	
 	this->pPositionElec = new double[this->n_0];
 	this->pPositionIon  = new double[this->n_0];
+	this->setVbounds();
 }
 void VelDist::destroy()
 {
@@ -171,6 +173,7 @@ void VelDist::show()
 	std::cout << "v_max : " << this->v_max << std::endl;
 	std::cout << "v_min : " << this->v_min << std::endl;
 	std::cout << "n_0 : " << this->n_0 << std::endl;
+	std::cout << "L : " << this->L << std::endl;
 
 }
 void VelDist::generateX(int i)

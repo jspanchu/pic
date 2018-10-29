@@ -1,11 +1,15 @@
 #include "include/file_io.hpp"
 #include <iostream>
+#include <iomanip>
 #include <string>
-FileIO::FileIO(std::string filename,std::string index)
+#include <sstream>
+FileIO::FileIO(std::string parameter,std::string index,int digits)
 {
+	std::stringstream filename;
 	//Open file for writing and place header row.
-	filename.append(index);
-	this->file.open(filename, std::ios::trunc | std::ios::out);
+	filename << "./output/" << parameter << "." << std::setw(digits) 
+	 << std::setfill<char>('0') << index << ".csv";
+	this->file.open(filename.str(), std::ios::trunc | std::ios::out);
 }
 FileIO::~FileIO()
 {

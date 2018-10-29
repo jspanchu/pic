@@ -9,8 +9,8 @@ class VelDist
 private:
 	double v_th = 1.;
 	double L = 100;
-	int n_0 = 20000;
-	double v_b = 2.;
+	int n_0 = 10000;
+	double v_b = 5.;
 	double v_min = 0.;
 	double v_max = 0.;
 	double tolerance = 1e-10;

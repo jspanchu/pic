@@ -9,10 +9,10 @@
 class ParticleMover
 {
 private:
- 
+
 	double t = 0.;
-    double t_max = 0.;
-    double dt = 0.;
+    double t_max = 200.; // in terms of 1 / omega = sqrt((m*eps) / (500000*e*e))  ~ 2.506590041516934e-05
+    double dt = 0.1; // in terms of 1 / omega = sqrt((m*eps) / (500000*e*e)) ~ 2.506590041516934e-05
     int iter = 0;
     double K = 0.;
     double U = 0.;
