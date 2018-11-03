@@ -75,7 +75,7 @@ void PoissonSolver::setE()
 		}
 		else
 		{
-			*(pE+i) = 0.1 * sin(i/2.*M_PI) + (*(pPhi+i-1) - *(pPhi+i+1)) / 2. /this->gridWidth;
+			*(pE+i) = (*(pPhi+i-1) - *(pPhi+i+1)) / 2. /this->gridWidth;
 		}
 	}
 }
@@ -88,7 +88,7 @@ void PoissonSolver::setLocalE(VelDist* pCharges)
 		weight = double(nodeID+1) - pCharges->getPositionElec(i) / this->gridWidth;
 		if(nodeID == this->nodes-1)
 		{
-			*(pLocalE + i) = *(pE+nodeID) * weight + *(pE+nodeID+0) * (1.-weight);  
+			*(pLocalE + 0) = *(pE+nodeID) * weight + *(pE+nodeID+0) * (1.-weight);  
 		}
 		else
 		{
@@ -127,7 +127,7 @@ void PoissonSolver::setPhi(NumDensity* pPlasma)
 	for(int i = 0; i < this->nodes-2; ++i)
 	{
 		*(pd + i) = -2.;
-		*(pRhs + i) = pPlasma->getDensity(i);
+		*(pRhs + i) = pPlasma->getDensity(i+1);
 	}
 	//Init lowerdiag and upperdiag.
 	for(int i = 0; i < this->nodes-3; ++i)
@@ -144,7 +144,7 @@ void PoissonSolver::setPhi(NumDensity* pPlasma)
 }
 void PoissonSolver::solver1D_tridiag(double* pLhs, double* pRhs)
 {
-    MKL_INT n = this->nodes-2, nrhs = 1, lda = this->nodes-2, ldb = 1, info;
+    MKL_INT n = this->nodes-2, nrhs = 1, ldb = 1, info;
 	info = LAPACKE_dgtsv(LAPACK_ROW_MAJOR, n, nrhs, pdl, pd,
 	 	pdu, pRhs, ldb);
 

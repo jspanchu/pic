@@ -45,6 +45,7 @@
         "functional": "cpp",
         "variant": "cpp",
         "thread": "cpp",
-        "memory": "cpp"
+        "memory": "cpp",
+        "iomanip": "cpp"
     }
 }
