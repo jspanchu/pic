@@ -10,12 +10,11 @@ private:
 	double gridWidth = 0.;
 	int nodes = 1000;
 	double nodeCoord = 0.;
+public:
+
 	double* pDensityElec;
 	double* pDensityIon;
 	double* pDensity; //all densities would be of size nodes
-
-
-public:
 
     //Constructor
     NumDensity();
@@ -26,12 +25,10 @@ public:
     //Getters
     double getGridWidth();
     int getNodes();
-    double getDensity(int i);
 
     //Setters
     void setNodes(int);
     void setGridWidth(double);
-    void setDensity(double, int);
 
     //General functions.
     void initDensity();

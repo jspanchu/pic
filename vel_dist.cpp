@@ -20,37 +20,9 @@ double VelDist::getV_th()
 {
 	return this->v_th;
 }
-int VelDist::getN()
-{
-	return this->n_0;
-}
-double VelDist::getL()
-{
-	return this->L;
-}
-double VelDist::getX(int i)
-{
-	return *(this->pX+i);
-}
-double VelDist::getF(int i)
-{
-	return *(this->pF+i);
-}
-double VelDist::getV(int i)
-{
-	return *(this->pV+i);
-}
 double VelDist::getTolerance()
 {
 	return this->tolerance;
-}
-double VelDist::getPositionElec(int i)
-{
-	return *(this->pPositionElec+i);
-}
-double VelDist::getPositionIon(int i)
-{
-	return *(this->pPositionIon+i);
 }
 //Setters start.
 void VelDist::setN(int n0)
@@ -67,9 +39,9 @@ void VelDist::setN(int n0)
 		this->init();
 	}
 }
-void VelDist::setL(double L)
+void VelDist::setL(double l)
 {
-	this->L = L;
+	this->l = l;
 }
 void VelDist::setV_th(double Vth)
 {
@@ -92,18 +64,6 @@ void VelDist::setTolerance(double toler)
 {
 	this->tolerance = toler;
 }
-void VelDist::setPositionElec(double pos, int i)
-{
-	*(this->pPositionElec + i) = pos;
-}
-void VelDist::setPositionIon(double pos, int i)
-{
-	*(this->pPositionIon + i) = pos;
-}
-void VelDist::setV(double vel, int i)
-{
-	*(this->pV + i) = vel;
-}
 
 //General functions start.
 void VelDist::init()
@@ -124,36 +84,36 @@ void VelDist::initPositions()
 	double ionElecTolerance = 0.;
 
 	std::cout << "generating X for electrons..." << std::endl;
-	for (int i = 0; i < getN(); ++i)
+	for (int i = 0; i < this->n_0; ++i)
 	{
 		
 		this->generateX(i);
 		if(i != 0)
 		{
-			elecElecTolerance = std::abs(getX(i) - getX(i-1)) /getX(i);
+			elecElecTolerance = std::abs(*(this->pX + i)- *(this->pX + i - 1)) / *(this->pX + i);
 		}
 		while (elecElecTolerance < this->getTolerance())
 		{
 			this->generateX(i);
-			elecElecTolerance = std::abs(getX(i) - getX(i+1))/getX(i);
+			elecElecTolerance = std::abs(*(this->pX + i) - *(this->pX + i + 1))/ *(this->pX + i);
 		}
 		*(this->pPositionElec+i) = *(this->pX+i);
 	
 	}
 	std::cout << "Finished " << std::endl;
 	std::cout << "generating X for ions..." << std::endl;
-	for (int i = 0; i < getN(); ++i)
+	for (int i = 0; i < this->n_0; ++i)
 	{
 		this->generateX(i);
 		if(i != 0)
 		{
-			ionIonTolerance = std::abs(getX(i) - getX(i-1))/getX(i);
+			ionIonTolerance = std::abs(*(this->pX + i) - *(this->pX + i - 1))/ *(this->pX + i);
 		}
 		while (ionIonTolerance < this->getTolerance())
 		{
 			this->generateX(i);
-			ionIonTolerance = std::abs(getX(i) - getX(i+1))/getX(i);
-			ionElecTolerance = std::abs(getX(i) - this->getPositionElec(i))/getX(i);
+			ionIonTolerance = std::abs(*(this->pX + i) - *(this->pX + i + 1))/ *(this->pX + i);
+			ionElecTolerance = std::abs(*(this->pX + i) - *(this->pPositionIon + i)/ *(this->pX + i));
 		}
 		*(this->pPositionIon+i) = *(this->pX+i);		
 	}
@@ -175,19 +135,19 @@ void VelDist::show()
 	std::cout << "v_max : " << this->v_max << std::endl;
 	std::cout << "v_min : " << this->v_min << std::endl;
 	std::cout << "n_0 : " << this->n_0 << std::endl;
-	std::cout << "L : " << this->L << std::endl;
+	std::cout << "L : " << this->l << std::endl;
 
 }
 void VelDist::generateX(int i)
 {
-	this->pX[i] = L * (double) rand() / (double) RAND_MAX;
+	*(this->pX + i) = l * (double) rand() / (double) RAND_MAX;
 }
 void VelDist::sampleV()
 {
 	std::cout << "Sampling Velocity..." << std::endl;
-	for (int i = 0 ; i < this->getN() ; ++i)
+	for (int i = 0 ; i < this->n_0 ; ++i)
 	{
-		*(this->pV+i) = this->generateV(i);
+		*(this-> pV + i) = this->generateV(i);
 	}
 	std::cout << "Finished " << std::endl;
 }

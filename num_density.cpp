@@ -22,10 +22,6 @@ int NumDensity::getNodes()
 {
 	return this->nodes;
 }
-double NumDensity::getDensity(int i)
-{
-	return *(this->pDensity + i);
-}
 
 //Setters
 void NumDensity::setNodes(int n)
@@ -38,10 +34,6 @@ void NumDensity::setNodes(int n)
 void NumDensity::setGridWidth(double L)
 {
 	this->gridWidth = L/double(nodes - 1.);
-}
-void NumDensity::setDensity(double rho, int i)
-{
-	*(pDensity+i) = rho;
 }
 
 //General functions.
@@ -72,11 +64,11 @@ void NumDensity::calcElecDensity(VelDist* pCharges)
 		*(pDensityElec+i) = 0.;
 	}
 	//Scan all the electrons' positions and 'weight' their positions to their neighbouring nodes.
-	for (int i = 0; i < pCharges->getN(); ++i)
+	for (int i = 0; i < pCharges->n_0; ++i)
 	{
 		double weight = 0.;
-		int nodeID = floor(pCharges->getPositionElec(i) / this->gridWidth);
-		weight = double(nodeID+1) - pCharges->getPositionElec(i) / this->gridWidth;
+		int nodeID = floor(*(pCharges->pPositionElec + i) / this->gridWidth);
+		weight = double(nodeID+1) - *(pCharges->pPositionElec + i) / this->gridWidth;
 		*(pDensityElec+nodeID) += weight / this->gridWidth;
 		if(nodeID == this->nodes - 1)
 		{
@@ -92,7 +84,7 @@ void NumDensity::calcIonDensity(VelDist* pCharges)
 {	//Scan all the Ions' positions and 'weight' their positions to their neighbouring nodes.
 	for (int i = 0; i< this->nodes; ++i)
 	{
-		*(pDensityIon + i) = double (pCharges->getN()) / pCharges->getL();
+		*(pDensityIon + i) = double (pCharges->n_0) / pCharges->l;
  	}
 }
 void NumDensity::calcDensity(VelDist* pCharges)

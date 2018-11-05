@@ -13,36 +13,26 @@ private:
 	int numElec = 0;
 	int numIon = 0;
 	double gridWidth = 0.;
-	double* pPhi = nullptr;
-	double* pLocalPhi = nullptr;
-	double* pE = nullptr;
-	double* pLocalE = nullptr;
 	double* pdl = nullptr;
 	double* pd = nullptr;
 	double* pdu = nullptr;
 
 public:
+
+	double* pPhi = nullptr;
+	double* pLocalPhi = nullptr;
+	double* pE = nullptr;
+	double* pLocalE = nullptr;
+
 	PoissonSolver(NumDensity*, VelDist*);
 	~PoissonSolver();
-	
-	//Init data for constructor
-	void init(NumDensity*,VelDist*);
 
-	//Getters
-	double getPhi(int);
-	double getLocalPhi(int);
-	double getE(int);
-	double getLocalE(int);
-
-	//Setters
-	void setPhi(NumDensity*);
-	void setLocalPhi(VelDist*);
-	void setE();
-	void setLocalE(VelDist*);
-	void setDiags();
-	void setNewCoeffs(NumDensity*);
-	void clearMem();
+	//General functions
+	void calcPhi(NumDensity*);
 	void solver1D_tridiag(double*, double*);
+	void calcE();
+	void calcLocalE(VelDist*);
+	void calcLocalPhi(VelDist*);
 };
 
 #endif

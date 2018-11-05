@@ -6,7 +6,9 @@
 
 PoissonSolver::PoissonSolver(NumDensity* pPlasma, VelDist* pCharges)
 {
-	this->init(pPlasma,pCharges);
+	this->gridWidth = pPlasma->getGridWidth();
+	this->nodes = pPlasma->getNodes();
+	this->numElec = pCharges->n_0;
     pPhi 		= new double[this->nodes];
 	pLocalPhi   = new double[this->numElec];
 	pE	 		= new double[this->nodes];
@@ -33,88 +35,8 @@ PoissonSolver::~PoissonSolver()
 	delete pd;
 	delete pdu;
 }
-void PoissonSolver::init(NumDensity* pPlasma, VelDist* pCharges)
-{	
-	this->gridWidth = pPlasma->getGridWidth();
-	this->nodes = pPlasma->getNodes();
-	this->numElec = pCharges->getN();
-	this->numIon = pCharges->getN();
-}
-
-//Getters
-double PoissonSolver::getPhi(int i)
-{
-	return *(this->pPhi+i);
-}
-double PoissonSolver::getLocalPhi(int i)
-{
-	return *(this->pLocalPhi+i);
-}
-double PoissonSolver::getE(int i)
-{
-	return *(this->pE+i);
-}
-double PoissonSolver::getLocalE(int i)
-{
-	return *(this->pLocalE+i);
-}
-
-//Setters
-void PoissonSolver::setE()
-{
-	for(int i = 0; i < (this->nodes); ++i)
-	{
-		//i = 0, i = nodes-1 are boundaries.
-		if(i == 0)
-		{
-			*(pE+0) = (*(pPhi+this->nodes-1) - *(pPhi+1)) / 2. /this->gridWidth;
-		}
-		else if(i == this->nodes-1)
-		{
-			*(pE+this->nodes-1) = (*(pPhi+this->nodes-2) - *(pPhi+0)) / 2. /this->gridWidth;
-		}
-		else
-		{
-			*(pE+i) = (*(pPhi+i-1) - *(pPhi+i+1)) / 2. /this->gridWidth;
-		}
-	}
-}
-void PoissonSolver::setLocalE(VelDist* pCharges)
-{
-	for(int i = 0; i < this->numElec; ++i)
-	{
-		double weight = 0.;
-		int nodeID = floor(pCharges->getPositionElec(i) / this->gridWidth);
-		weight = double(nodeID+1) - pCharges->getPositionElec(i) / this->gridWidth;
-		if(nodeID == this->nodes-1)
-		{
-			*(pLocalE + 0) = *(pE+nodeID) * weight + *(pE+nodeID+0) * (1.-weight);  
-		}
-		else
-		{
-			*(pLocalE + i) = *(pE+nodeID) * weight + *(pE+nodeID+1) * (1.-weight);			
-		}
-	}
-}
-void PoissonSolver::setLocalPhi(VelDist* pCharges)
-{
-	for(int i = 0; i < this->numElec; ++i)
-	{
-		double weight = 0.;
-		int nodeID = floor(pCharges->getPositionElec(i) / this->gridWidth);
-		weight = double(nodeID+1) - pCharges->getPositionElec(i) / this->gridWidth;
-		if(nodeID == this->nodes-1)
-		{
-			*(pLocalPhi + i) = *(pPhi+nodeID) * weight + *(pPhi+nodeID+0) * (1.-weight);  
-		}
-		else
-		{
-			*(pLocalPhi + i) = *(pPhi+nodeID) * weight + *(pPhi+nodeID+1) * (1.-weight);			
-		}
-	}
-
-}
-void PoissonSolver::setPhi(NumDensity* pPlasma)
+//General functions
+void PoissonSolver::calcPhi(NumDensity* pPlasma)
 {
 	double *pRhs = nullptr;
 	pRhs = new double [this->nodes-2];
@@ -127,7 +49,7 @@ void PoissonSolver::setPhi(NumDensity* pPlasma)
 	for(int i = 0; i < this->nodes-2; ++i)
 	{
 		*(pd + i) = -2.;
-		*(pRhs + i) = pPlasma->getDensity(i+1);
+		*(pRhs + i) = *(pPlasma->pDensity + i + 1);
 	}
 	//Init lowerdiag and upperdiag.
 	for(int i = 0; i < this->nodes-3; ++i)
@@ -155,4 +77,58 @@ void PoissonSolver::solver1D_tridiag(double* pLhs, double* pRhs)
 		std::cout << "the solution could not be computed.\n";
 		exit( 1 );
 	}
+}
+void PoissonSolver::calcE()
+{
+	for(int i = 0; i < (this->nodes); ++i)
+	{
+		//i = 0, i = nodes-1 are boundaries.
+		if(i == 0)
+		{
+			*(pE+0) = (*(pPhi+this->nodes-1) - *(pPhi+1)) / 2. /this->gridWidth;
+		}
+		else if(i == this->nodes-1)
+		{
+			*(pE+this->nodes-1) = (*(pPhi+this->nodes-2) - *(pPhi+0)) / 2. /this->gridWidth;
+		}
+		else
+		{
+			*(pE+i) = (*(pPhi+i-1) - *(pPhi+i+1)) / 2. /this->gridWidth;
+		}
+	}
+}
+void PoissonSolver::calcLocalE(VelDist* pCharges)
+{
+	for(int i = 0; i < this->numElec; ++i)
+	{
+		double weight = 0.;
+		int nodeID = floor(*(pCharges->pPositionElec + i) / this->gridWidth);
+		weight = double(nodeID+1) - *(pCharges->pPositionElec + i) / this->gridWidth;
+		if(nodeID == this->nodes-1)
+		{
+			*(pLocalE + 0) = *(pE+nodeID) * weight + *(pE+nodeID+0) * (1.-weight);  
+		}
+		else
+		{
+			*(pLocalE + i) = *(pE+nodeID) * weight + *(pE+nodeID+1) * (1.-weight);			
+		}
+	}
+}
+void PoissonSolver::calcLocalPhi(VelDist* pCharges)
+{
+	for(int i = 0; i < this->numElec; ++i)
+	{
+		double weight = 0.;
+		int nodeID = floor(*(pCharges->pPositionElec + i) / this->gridWidth);
+		weight = double(nodeID+1) - *(pCharges->pPositionElec + i) / this->gridWidth;
+		if(nodeID == this->nodes-1)
+		{
+			*(pLocalPhi + i) = *(pPhi+nodeID) * weight + *(pPhi+nodeID+0) * (1.-weight);  
+		}
+		else
+		{
+			*(pLocalPhi + i) = *(pPhi+nodeID) * weight + *(pPhi+nodeID+1) * (1.-weight);			
+		}
+	}
+
 }

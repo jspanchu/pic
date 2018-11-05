@@ -87,7 +87,7 @@ int main(int argc, char **argv) {
     }
     pCharges->initPositions();
     pCharges->sampleV();
-    pPlasma->setGridWidth(pCharges->getL());
+    pPlasma->setGridWidth(pCharges->l);
 
     PoissonSolver *pFields;
     PoissonSolver fields(pPlasma,pCharges);
@@ -122,17 +122,17 @@ int main(int argc, char **argv) {
             pPhi->fileWrite("x","phi");
             for(int i = 0; i < pPlasma->getNodes(); ++i)
             {
-                pPhi->fileWrite(double(i)*double(pCharges->getL())/double(pPlasma->getNodes()), pFields->getPhi(i));
+                pPhi->fileWrite(double(i)*double(pCharges->l)/double(pPlasma->getNodes()), *(pFields->pPhi + i));
             }
 
             FileIO *pDist;
             FileIO dist("fvx",j,digits);
             pDist = &dist;
             pDist->fileWrite("x","v","f");
-            for(int i = 0; i < pCharges->getN(); ++i)
+            for(int i = 0; i < pCharges->n_0; ++i)
             {
 
-                pDist->fileWrite(pCharges->getPositionElec(i),pCharges->getV(i),pCharges->getF(i));
+                pDist->fileWrite(*(pCharges->pPositionElec + i), *(pCharges->pV + i), *(pCharges->pF + i));
             }
             FileIO *pDens;
             FileIO dens("rho",j,digits);
@@ -140,7 +140,7 @@ int main(int argc, char **argv) {
             pDens->fileWrite("x","rho");
             for(int i = 0; i < pPlasma->getNodes(); ++i)
             {
-                pDens->fileWrite(double(i)*double(pCharges->getL())/double(pPlasma->getNodes()),pPlasma->getDensity(i));
+                pDens->fileWrite(double(i)*double(pCharges->l)/double(pPlasma->getNodes()), *(pPlasma->pDensity + i));
             }
             FileIO *pE;
             FileIO field("E",j,digits);
@@ -148,7 +148,7 @@ int main(int argc, char **argv) {
             pE->fileWrite("x","E");
             for(int i = 0; i < pPlasma->getNodes(); ++i)
             {
-                pE->fileWrite(double(i)*double(pCharges->getL())/double(pPlasma->getNodes()),pFields->getE(i));
+                pE->fileWrite(double(i)*double(pCharges->l)/double(pPlasma->getNodes()),*(pFields->pE + i));
             }
 
             std::cout << "Wrote Files\n";
@@ -173,9 +173,9 @@ void calcElecField(NumDensity* pPlasma, VelDist* pCharges, PoissonSolver* pField
     pPlasma->calcIonDensity(pCharges);
     pPlasma->calcDensity(pCharges);
 
-    pFields->setPhi(pPlasma);
-    pFields->setE();
-    pFields->setLocalE(pCharges);
+    pFields->calcPhi(pPlasma);
+    pFields->calcE();
+    pFields->calcLocalE(pCharges);
 }
 
 

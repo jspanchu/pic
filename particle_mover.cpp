@@ -62,17 +62,17 @@ void ParticleMover::setIter()
 void ParticleMover::xIncr(NumDensity* pPlasma, VelDist* pCharges)
 {
 	std::cout << "Pushing all the electrons...\n";
-	for (int i = 0; i < pCharges->getN(); ++i)
+	for (int i = 0; i < pCharges->n_0; ++i)
 	{
 		//std::cout << i << std::endl;
-		pCharges->setPositionElec(pCharges->getPositionElec(i) + dt * (pCharges->getV(i)), i);
-		if(pCharges->getPositionElec(i) > pCharges->getL())
+		*(pCharges->pPositionElec + i) += dt * *(pCharges->pV + i);
+		if(*(pCharges->pPositionElec + i) > pCharges->l)
 		{
-			pCharges->setPositionElec(pCharges->getPositionElec(i) - pCharges->getL(), i);
+			*(pCharges->pPositionElec + i) -= pCharges->l;
 		}
-		else if(pCharges->getPositionElec(i) < 0.)
+		else if(*(pCharges->pPositionElec + i) < 0.)
 		{
-			pCharges->setPositionElec(pCharges->getPositionElec(i) + pCharges->getL(), i);
+			*(pCharges->pPositionElec + i) += pCharges->l;
 		}
 	}
 	this->t +=dt;
@@ -81,15 +81,15 @@ void ParticleMover::xIncr(NumDensity* pPlasma, VelDist* pCharges)
 void ParticleMover::vIncr(PoissonSolver* pFields, VelDist* pCharges, int k)
 {
 	std::cout << "Incrementing velocities of all the electrons...\n";
-	for (int i = 0; i < pCharges->getN(); ++i)
+	for (int i = 0; i < pCharges->n_0; ++i)
 	{
 		if(k == 1)
 		{
-			pCharges->setV(pCharges->getV(i) + (dt/2.) * (pFields->getLocalE(i)),i);
+			*(pCharges->pV + i) += (dt/2.) * *(pFields->pLocalE + i);
 		}
 		else
 		{	
-			pCharges->setV(pCharges->getV(i) - (dt) * (pFields->getLocalE(i)), i);
+			*(pCharges->pV + i) -= (dt) * *(pFields->pLocalE + i);
 		}
 	}
 
