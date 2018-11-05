@@ -1,5 +1,5 @@
 CXX = icpc 
-OBJS = vel_dist.o file_io.o num_density.o poisson_solver.o particle_mover.o driver.o 
+OBJS = file_io.o driver.o
 #CXX = g++ -O 3
 CXXFLAGS = -L${MKLROOT}/lib/intel64 -Wl,--no-as-needed -lmkl_intel_ilp64 -lmkl_sequential -lmkl_core -lpthread -ldl
 
@@ -12,4 +12,4 @@ tsi:	$(OBJS)
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 clean:
-	rm -fr tsi $(OBJS) *.out *.png ./imagesOut/*.png ./output/*.csv
+	rm -rf tsi $(OBJS) *.out *.o ./output/*.csv
