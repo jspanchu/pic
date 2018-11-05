@@ -15,7 +15,7 @@
 
 void calcElecField(NumDensity*, VelDist*, PoissonSolver*);
 int main(int argc, char **argv) {
-    char option,solve;
+    char option,solve,fileOut;
     double v_th = 0.;
     double v_b = 0.;
     int n_0 = 0;
@@ -36,54 +36,54 @@ int main(int argc, char **argv) {
     ParticleMover iterator;
     pIterator = &iterator;
 
-    std::cout << "\n\n#################################" << std::endl;
-    std::cout << "Default parameters are : " << std::endl;
+    std::cout << "\n\n#################################\n";
+    std::cout << "Default parameters are : \n";
     pCharges->show();
-    std::cout << "Nodes : " << pPlasma->getNodes() << std::endl;
-    std::cout << "t_max : " << pIterator->getTmax() << std::endl;
-    std::cout << "dt : " << pIterator->getDt() << std::endl;
-    std::cout << "#################################\n\n";
-    std::cout << "Accept defaults ? (y/n)" << std::endl;
+    std::cout << "Nodes : " << pPlasma->getNodes();
+    std::cout << "\nt_max : " << pIterator->getTmax();
+    std::cout << "\ndt : " << pIterator->getDt();
+    std::cout << "\n#################################\n";
+    std::cout << "\nAccept defaults ? (y/n)\n";
     std::cin >> option;
    if (option == 'n' | option == 'N')
     {
         do
             {
-                std::cout << "\nEnter thermal velocity (in normalized units) : " << std::endl;
+                std::cout << "\nEnter thermal velocity (in normalized units) : \n";
                 std::cin >> v_th;
                 pCharges->setV_th(v_th);
-                std::cout << "Enter beam velocity in terms of thermal velocity : " << std::endl;
+                std::cout << "Enter beam velocity in terms of thermal velocity : \n";
                 std::cin >> v_b;
                 pCharges->setV_b(v_b);
-                std::cout << "Enter number of charges in the plasma : " << std::endl;
+                std::cout << "Enter number of charges in the plasma : \n";
                 std::cin >> n_0;
                 pCharges->setN(n_0);
-                std::cout << "Enter the domain's length (in order of debye length's) : " << std::endl;
+                std::cout << "Enter the domain's length (in order of debye length's) : \n";
                 std::cin >> l;
                 pCharges->setL(l);
-                std::cout << "Enter number of nodes on the grid : " << std::endl;
+                std::cout << "Enter number of nodes on the grid : \n";
                 std::cin >> nodes;
                 pPlasma->setNodes(nodes);
-                std::cout << "Enter maximum time (in inverse plasma frequencies) upto which simulation would evolve : " << std::endl;
+                std::cout << "Enter maximum time (in inverse plasma frequencies) upto which simulation would evolve : \n";
                 std::cin >> t_max;
                 pIterator->setTmax(t_max);
-                std::cout << "Enter time step (in inverse plasma frequencies) : " << std::endl;
+                std::cout << "Enter time step (in inverse plasma frequencies) : \n";
                 std::cin >> dt;
                 pIterator->setDt(dt);
-                std::cout << "\n#################################" << std::endl;
-                std::cout << "Entered values :" << std::endl;
+                std::cout << "\n#################################\n";
+                std::cout << "Entered values :\n";
                 pCharges->show();
-                std::cout << "Nodes : " << pPlasma->getNodes() << std::endl;
-                std::cout << "T_max : " << pIterator->getTmax() << std::endl;
-                std::cout << "Time step : " << pIterator->getDt() << std::endl;
-                std::cout << "#################################" << std::endl;
+                std::cout << "\nNodes : " << pPlasma->getNodes();
+                std::cout << "\nT_max : " << pIterator->getTmax();
+                std::cout << "\nTime step : " << pIterator->getDt();
+                std::cout << "\n#################################\n";
                 std::cout << "\nSolve ? (y/n) : "; std::cin >> solve; std::cout << "\n";
             }
         while(solve == 'n');
     }
     else
     {
-        std::cout << "\nComputing for default values... \n" << std::endl;
+        std::cout << "\nComputing for default values... \n";
     }
     pCharges->initPositions();
     pCharges->sampleV();
@@ -101,55 +101,58 @@ int main(int argc, char **argv) {
         digits++; 
     } 
     while (maxDigits != 0);
+    std::cout << "\nWrite output to file? (y/n) "; std::cin >> fileOut; std::cout << "\n";
     std::clock_t tsolve0 = std::clock();
     for (int k = 0; k <= pIterator->getIter(); ++k)
     {
 
-        std::cout << "\n# Simulation Time : " << k*pIterator->getDt() << std::endl;
+        std::cout << "\n# Simulation Time : " << k*pIterator->getDt();
         //Compute density and fields.
-        std::cout << "Computing density and fields..." << std::endl;
+        std::cout << "\nComputing density and fields...\n";
         calcElecField(pPlasma, pCharges, pFields);
 
-        //Write fields and positions at current time.
-        std::string(j) = std::to_string(k);
-
-        FileIO *pPhi;
-        FileIO phi("phi",j,digits);
-        pPhi = &phi;
-        pPhi->fileWrite("x","phi");
-        for(int i = 0; i < pPlasma->getNodes(); ++i)
+        if(fileOut == 'y')
         {
-            pPhi->fileWrite(double(i)*double(pCharges->getL())/double(pPlasma->getNodes()), pFields->getPhi(i));
-        }
+            //Write fields and positions at current time.
+            std::string(j) = std::to_string(k);
 
-        FileIO *pDist;
-        FileIO dist("fvx",j,digits);
-        pDist = &dist;
-        pDist->fileWrite("x","v","f");
-        for(int i = 0; i < pCharges->getN(); ++i)
-        {
+            FileIO *pPhi;
+            FileIO phi("phi",j,digits);
+            pPhi = &phi;
+            pPhi->fileWrite("x","phi");
+            for(int i = 0; i < pPlasma->getNodes(); ++i)
+            {
+                pPhi->fileWrite(double(i)*double(pCharges->getL())/double(pPlasma->getNodes()), pFields->getPhi(i));
+            }
 
-            pDist->fileWrite(pCharges->getPositionElec(i),pCharges->getV(i),pCharges->getF(i));
-        }
-        FileIO *pDens;
-        FileIO dens("rho",j,digits);
-        pDens = &dens;
-        pDens->fileWrite("x","rho");
-        for(int i = 0; i < pPlasma->getNodes(); ++i)
-        {
-            pDens->fileWrite(double(i)*double(pCharges->getL())/double(pPlasma->getNodes()),pPlasma->getDensity(i));
-        }
-        FileIO *pE;
-        FileIO field("E",j,digits);
-        pE = &field;
-        pE->fileWrite("x","E");
-        for(int i = 0; i < pPlasma->getNodes(); ++i)
-        {
-            pE->fileWrite(double(i)*double(pCharges->getL())/double(pPlasma->getNodes()),pFields->getE(i));
-        }
+            FileIO *pDist;
+            FileIO dist("fvx",j,digits);
+            pDist = &dist;
+            pDist->fileWrite("x","v","f");
+            for(int i = 0; i < pCharges->getN(); ++i)
+            {
 
-        std::cout << "Wrote Files" << std::endl;
-        
+                pDist->fileWrite(pCharges->getPositionElec(i),pCharges->getV(i),pCharges->getF(i));
+            }
+            FileIO *pDens;
+            FileIO dens("rho",j,digits);
+            pDens = &dens;
+            pDens->fileWrite("x","rho");
+            for(int i = 0; i < pPlasma->getNodes(); ++i)
+            {
+                pDens->fileWrite(double(i)*double(pCharges->getL())/double(pPlasma->getNodes()),pPlasma->getDensity(i));
+            }
+            FileIO *pE;
+            FileIO field("E",j,digits);
+            pE = &field;
+            pE->fileWrite("x","E");
+            for(int i = 0; i < pPlasma->getNodes(); ++i)
+            {
+                pE->fileWrite(double(i)*double(pCharges->getL())/double(pPlasma->getNodes()),pFields->getE(i));
+            }
+
+            std::cout << "Wrote Files\n";
+        }   
         if(k == pIterator->getIter())
         {
             break;
@@ -161,7 +164,7 @@ int main(int argc, char **argv) {
         
     }
     std::clock_t tsolve1 = std::clock();
-    std::cout << "Time taken to solve : " << double (tsolve1 - tsolve0) / (double) CLOCKS_PER_SEC << "seconds" << std::endl;
+    std::cout << "Time taken to solve : " << double (tsolve1 - tsolve0) / (double) CLOCKS_PER_SEC << "seconds\n";
     return 0;
 }
 void calcElecField(NumDensity* pPlasma, VelDist* pCharges, PoissonSolver* pFields)
