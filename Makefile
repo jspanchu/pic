@@ -12,4 +12,4 @@ tsi:	$(OBJS)
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 clean:
-	rm -rf tsi $(OBJS) *.out *.o ./output/*.csv
+	rm -rf tsi $(OBJS) ./output/*.csv
