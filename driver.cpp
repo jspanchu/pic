@@ -4,8 +4,6 @@
 #include <cmath>
 #include <fstream>
 #include <ctime>
-#include <thread>
-#include "omp.h"
 #include "include/num_density.hpp"
 #include "include/vel_dist.hpp"
 #include "include/poisson_solver.hpp"
@@ -14,6 +12,7 @@
 
 
 void calcElecField(NumDensity*, VelDist*, PoissonSolver*);
+
 int main(int argc, char **argv) {
     char option,solve,fileOut;
     double v_th = 0.;
