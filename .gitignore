@@ -4,5 +4,5 @@ output/
 imagesOut/
 *.out
 *.o
-.vs
-.vscode
+.vs/
+.vscode/
