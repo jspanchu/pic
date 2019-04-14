@@ -1,8 +1,4 @@
 #include "include/poisson_solver.hpp"
-#include "include/num_density.hpp"
-#include "include/vel_dist.hpp"
-#include <cmath>
-#include <iostream>
 
 PoissonSolver::PoissonSolver(NumDensity* pPlasma, VelDist* pCharges)
 {

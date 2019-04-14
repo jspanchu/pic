@@ -1,8 +1,4 @@
 #include "include/vel_dist.hpp"
-#include <iostream>
-#include <ctime>
-#include <cstdlib>
-#include <cmath>
 VelDist::VelDist()
 {
 	//set seed, beam velocity, number of ions/electrons and thermal spread.

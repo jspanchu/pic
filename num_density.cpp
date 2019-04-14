@@ -1,7 +1,4 @@
 #include "include/num_density.hpp"
-#include "include/vel_dist.hpp"
-#include <iostream>
-#include <cmath>
 //Constructor
 NumDensity::NumDensity()
 {
@@ -93,7 +90,6 @@ void NumDensity::calcDensity(VelDist* pCharges)
 	{
 		*(pDensity+i) = *(pDensityElec+i) / *(pDensityIon+i) - 1.;
 	}
-	//std::cout<<*(pDensity + this->nodes-1) << "," << *(pDensity + 0) << std::endl;
 }
 
 

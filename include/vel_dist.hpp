@@ -1,6 +1,9 @@
 //This class generates the velocity distribution of two counter-streaming beams of electrons in a hot unmagnetized
 //plasma. It makes use of the acceptance-rejection sampling method.
 
+#include <iostream>
+#include <cmath>
+#include <cstdlib>
 #ifndef VEL_DIST
 #define VEL_DIST
 

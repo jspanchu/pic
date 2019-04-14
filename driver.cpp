@@ -1,9 +1,4 @@
-#include <iostream>
-#include <cstdlib>
-#include <string>
-#include <cmath>
-#include <fstream>
-#include <ctime>
+#include <chrono>
 #include "include/num_density.hpp"
 #include "include/vel_dist.hpp"
 #include "include/poisson_solver.hpp"
@@ -22,6 +17,7 @@ int main(int argc, char **argv) {
     int nodes = 0;
     double t_max = 0.;
     double dt = 0.;
+    std::chrono::time_point<std::chrono::system_clock> start, end;
 
     VelDist *pCharges;
     VelDist counterStream;
@@ -101,7 +97,8 @@ int main(int argc, char **argv) {
     } 
     while (maxDigits != 0);
     std::cout << "\nWrite output to file? (y/n) "; std::cin >> fileOut; std::cout << "\n";
-    std::clock_t tsolve0 = std::clock();
+    //Start timer
+    start = std::chrono::system_clock::now();
     for (int k = 0; k <= pIterator->getIter(); ++k)
     {
 
@@ -162,8 +159,10 @@ int main(int argc, char **argv) {
         pIterator->vIncr(pFields,pCharges,k);
         
     }
-    std::clock_t tsolve1 = std::clock();
-    std::cout << "Time taken to solve : " << double (tsolve1 - tsolve0) / (double) CLOCKS_PER_SEC << "seconds\n";
+    //Stop timer.
+    end = std::chrono::system_clock::now(); 
+    std::chrono::duration<double> elapsed_seconds = end - start;
+    std::cout << "Elapsed time : " << elapsed_seconds.count() << " s\n";
     return 0;
 }
 void calcElecField(NumDensity* pPlasma, VelDist* pCharges, PoissonSolver* pFields)

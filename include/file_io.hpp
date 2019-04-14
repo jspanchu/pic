@@ -1,7 +1,10 @@
 // This class takes care of any file I/O operations.
 
+#include <iostream>
+#include <iomanip>
+#include <sstream>
 #include <fstream>
-#include <string>
+
 #ifndef FILE_IO
 #define FILE_IO
 

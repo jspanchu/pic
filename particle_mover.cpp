@@ -6,11 +6,6 @@
  */
 
 #include "include/particle_mover.hpp"
-#include "include/poisson_solver.hpp"
-#include "include/num_density.hpp"
-#include "include/vel_dist.hpp"
-#include <cmath>
-#include <iostream>
 
 ParticleMover::ParticleMover()
 {

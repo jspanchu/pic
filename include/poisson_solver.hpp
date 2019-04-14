@@ -2,6 +2,7 @@
 #include "num_density.hpp"
 #include "vel_dist.hpp"
 #include "mkl_lapacke.h"
+#include <iostream>
 
 #ifndef POISSON_SOLVER_HPP_
 #define POISSON_SOLVER_HPP_
