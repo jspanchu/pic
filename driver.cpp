@@ -21,16 +21,21 @@ int main(int argc, char **argv) {
 
     VelDist *pCharges;
     VelDist counterStream;
-    pCharges = &counterStream;
+    pCharges = &counterStream; //All references to the charge distribution will be made using pCharges
 
     NumDensity *pPlasma;
     NumDensity plasma;
-    pPlasma = &plasma;
+    pPlasma = &plasma; //All references to the plasma will be made using pPlasma
     
     ParticleMover* pIterator;
     ParticleMover iterator;
-    pIterator = &iterator;
+    pIterator = &iterator; //All references to the iterator will be made using pIterator
 
+    FileIO *pPhi;
+    FileIO *pDist;
+    FileIO *pDens;
+    FileIO *pE;
+    
     std::cout << "\n\n#################################\n";
     std::cout << "Default parameters are : \n";
     pCharges->show();
@@ -97,8 +102,11 @@ int main(int argc, char **argv) {
     } 
     while (maxDigits != 0);
     std::cout << "\nWrite output to file? (y/n) "; std::cin >> fileOut; std::cout << "\n";
+    
     //Start timer
     start = std::chrono::system_clock::now();
+
+    //Evolve the counter-streaming beam in steps of dt.
     for (int k = 0; k <= pIterator->getIter(); ++k)
     {
 
@@ -112,7 +120,6 @@ int main(int argc, char **argv) {
             //Write fields and positions at current time.
             std::string(j) = std::to_string(k);
 
-            FileIO *pPhi;
             FileIO phi("phi",j,digits);
             pPhi = &phi;
             pPhi->fileWrite("x","phi");
@@ -121,7 +128,6 @@ int main(int argc, char **argv) {
                 pPhi->fileWrite(double(i)*double(pCharges->l)/double(pPlasma->getNodes()), *(pFields->pPhi + i));
             }
 
-            FileIO *pDist;
             FileIO dist("fvx",j,digits);
             pDist = &dist;
             pDist->fileWrite("x","v","f");
@@ -130,7 +136,7 @@ int main(int argc, char **argv) {
 
                 pDist->fileWrite(*(pCharges->pPositionElec + i), *(pCharges->pV + i), *(pCharges->pF + i));
             }
-            FileIO *pDens;
+
             FileIO dens("rho",j,digits);
             pDens = &dens;
             pDens->fileWrite("x","rho");
@@ -138,7 +144,7 @@ int main(int argc, char **argv) {
             {
                 pDens->fileWrite(double(i)*double(pCharges->l)/double(pPlasma->getNodes()), *(pPlasma->pDensity + i));
             }
-            FileIO *pE;
+
             FileIO field("E",j,digits);
             pE = &field;
             pE->fileWrite("x","E");
