@@ -1,4 +1,5 @@
 #include "include/file_io.hpp"
+
 FileIO::FileIO(std::string parameter,std::string index,int digits)
 {
 	std::stringstream filename;
