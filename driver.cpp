@@ -31,10 +31,10 @@ int main(int argc, char **argv) {
     ParticleMover iterator;
     pIterator = &iterator; //All references to the iterator will be made using pIterator
 
-    FileIO *pPhi;
-    FileIO *pDist;
-    FileIO *pDens;
-    FileIO *pE;
+    FileIO *pfilePhi;
+    FileIO *pfileDist;
+    FileIO *pfileDens;
+    FileIO *pfileE;
     
     std::cout << "\n\n#################################\n";
     std::cout << "Default parameters are : \n";
@@ -121,36 +121,36 @@ int main(int argc, char **argv) {
             std::string(j) = std::to_string(k);
 
             FileIO phi("phi",j,digits);
-            pPhi = &phi;
-            pPhi->fileWrite("x","phi");
+            pfilePhi = &phi;
+            pfilePhi->fileWrite("x","phi");
             for(int i = 0; i < pPlasma->getNodes(); ++i)
             {
-                pPhi->fileWrite(double(i)*double(pCharges->l)/double(pPlasma->getNodes()), *(pFields->pPhi + i));
+                pfilePhi->fileWrite(double(i)*double(pCharges->l)/double(pPlasma->getNodes()), *(pFields->pPhi + i));
             }
 
             FileIO dist("fvx",j,digits);
-            pDist = &dist;
-            pDist->fileWrite("x","v","f");
+            pfileDist = &dist;
+            pfileDist->fileWrite("x","v","f");
             for(int i = 0; i < pCharges->n_0; ++i)
             {
 
-                pDist->fileWrite(*(pCharges->pPositionElec + i), *(pCharges->pV + i), *(pCharges->pF + i));
+                pfileDist->fileWrite(*(pCharges->pPositionElec + i), *(pCharges->pV + i), *(pCharges->pF + i));
             }
 
             FileIO dens("rho",j,digits);
-            pDens = &dens;
-            pDens->fileWrite("x","rho");
+            pfileDens = &dens;
+            pfileDens->fileWrite("x","rho");
             for(int i = 0; i < pPlasma->getNodes(); ++i)
             {
-                pDens->fileWrite(double(i)*double(pCharges->l)/double(pPlasma->getNodes()), *(pPlasma->pDensity + i));
+                pfileDens->fileWrite(double(i)*double(pCharges->l)/double(pPlasma->getNodes()), *(pPlasma->pDensity + i));
             }
 
             FileIO field("E",j,digits);
-            pE = &field;
-            pE->fileWrite("x","E");
+            pfileE = &field;
+            pfileE->fileWrite("x","E");
             for(int i = 0; i < pPlasma->getNodes(); ++i)
             {
-                pE->fileWrite(double(i)*double(pCharges->l)/double(pPlasma->getNodes()),*(pFields->pE + i));
+                pfileE->fileWrite(double(i)*double(pCharges->l)/double(pPlasma->getNodes()),*(pFields->pE + i));
             }
 
         }   
