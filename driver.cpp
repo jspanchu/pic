@@ -153,7 +153,6 @@ int main(int argc, char **argv) {
                 pE->fileWrite(double(i)*double(pCharges->l)/double(pPlasma->getNodes()),*(pFields->pE + i));
             }
 
-            std::cout << "Wrote Files\n";
         }   
         if(k == pIterator->getIter())
         {
