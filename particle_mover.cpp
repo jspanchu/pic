@@ -56,7 +56,6 @@ void ParticleMover::setIter()
 }
 void ParticleMover::xIncr(NumDensity* pPlasma, VelDist* pCharges)
 {
-	std::cout << "Pushing all the electrons...\n";
 	for (int i = 0; i < pCharges->n_0; ++i)
 	{
 		//std::cout << i << std::endl;
@@ -75,7 +74,6 @@ void ParticleMover::xIncr(NumDensity* pPlasma, VelDist* pCharges)
 }
 void ParticleMover::vIncr(PoissonSolver* pFields, VelDist* pCharges, int k)
 {
-	std::cout << "Incrementing velocities of all the electrons...\n";
 	for (int i = 0; i < pCharges->n_0; ++i)
 	{
 		if(k == 1)
