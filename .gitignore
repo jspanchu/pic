@@ -4,5 +4,6 @@ output/
 imagesOut/
 *.out
 *.o
+*.png
 .vs/
 .vscode/
