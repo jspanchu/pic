@@ -1,9 +1,4 @@
-tsi
 .metadata/
-output/
-imagesOut/
-*.out
-*.o
-*.png
+build/
 .vs/
 .vscode/
