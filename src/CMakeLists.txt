@@ -21,15 +21,15 @@ endif()
 
 add_executable(tsi vel_dist.cpp file_io.cpp num_density.cpp poisson_solver.cpp particle_mover.cpp driver.cpp)
 
+# Find MKL
 set (CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/CMake)
-
 find_package(MKL)
-
 if(MKL_FOUND)
     include_directories(${MKL_INCLUDE_DIRS})
     target_link_libraries(tsi mkl_intel_lp64 mkl_sequential mkl_core)
 endif()
 
+# Create Output directory and remove existing one
 if(EXISTS ${CMAKE_BINARY_DIR}/output)
     file(REMOVE_RECURSE ${CMAKE_BINARY_DIR}/output)
 endif()
